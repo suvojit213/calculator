@@ -253,9 +253,12 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
         if (_isNewNumber) {
           _currentNumber = buttonText;
           _isNewNumber = false;
-          _expression = buttonText;
         } else {
           _currentNumber += buttonText;
+        }
+        if (_operand.isNotEmpty && _isNewNumber) {
+          _expression += buttonText;
+        } else {
           _expression = _expression.substring(0, _cursorPosition) +
               buttonText +
               _expression.substring(_cursorPosition);
