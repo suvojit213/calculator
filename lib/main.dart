@@ -195,20 +195,20 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
 
     return Expanded(
       child: Container(
-        margin: const EdgeInsets.all(8.0),
+        margin: const EdgeInsets.all(6.0), // Reduced margin
         child: ElevatedButton(
           onPressed: () => _buttonPressed(buttonValue),
           style: ElevatedButton.styleFrom(
             backgroundColor: currentButtonColor,
             foregroundColor: currentTextColor,
             shape: const CircleBorder(),
-            padding: const EdgeInsets.all(20),
-            minimumSize: const Size(80, 80), // Ensure buttons are circular
+            padding: const EdgeInsets.all(18), // Reduced padding
+            minimumSize: const Size(75, 75), // Slightly smaller buttons
           ),
           child: child ?? Text(
             buttonValue,
             style: const TextStyle(
-              fontSize: 35.0,
+              fontSize: 32.0, // Slightly smaller font for buttons
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -221,24 +221,24 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
     return Expanded(
       flex: 2,
       child: Container(
-        margin: const EdgeInsets.all(8.0),
+        margin: const EdgeInsets.all(6.0), // Reduced margin
         child: ElevatedButton(
           onPressed: () => _buttonPressed(buttonValue),
           style: ElevatedButton.styleFrom(
             backgroundColor: buttonColor,
             foregroundColor: textColor,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(50.0), // Rounded rectangle for zero
+              borderRadius: BorderRadius.circular(45.0), // Adjusted for smaller size
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-            minimumSize: const Size(170, 80), // Wider for zero
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18), // Reduced padding
+            minimumSize: const Size(160, 75), // Adjusted for smaller size
           ),
           child: child ?? Align(
             alignment: Alignment.centerLeft,
             child: Text(
               buttonValue,
               style: const TextStyle(
-                fontSize: 35.0,
+                fontSize: 32.0, // Slightly smaller font for buttons
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -256,7 +256,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
           Expanded(
             flex: 2,
             child: Container(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.all(18.0), // Reduced padding
               alignment: Alignment.bottomRight,
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300), // Animation duration
@@ -274,20 +274,20 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                         _output,
                         key: ValueKey<String>(_output), // Key for AnimatedSwitcher
                         style: const TextStyle(
-                          fontSize: 50.0, // Fixed smaller size for the result
+                          fontSize: 45.0, // Fixed smaller size for the result
                           fontWeight: FontWeight.w300,
                           color: Colors.white,
                         ),
                       );
                     } else {
                       // Display _expression with dynamic sizing and scrolling
-                      double fontSize = 90.0;
+                      double fontSize = 80.0; // Adjusted initial font size
                       if (_expression.length > 10 && _expression.length <= 15) {
-                        fontSize = 70.0;
+                        fontSize = 65.0;
                       } else if (_expression.length > 15 && _expression.length <= 20) {
-                        fontSize = 50.0;
+                        fontSize = 48.0;
                       } else if (_expression.length > 20) {
-                        fontSize = 40.0;
+                        fontSize = 38.0;
                       }
 
                       return SingleChildScrollView(
@@ -310,7 +310,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(bottom: 20.0), // Add bottom padding
+            padding: const EdgeInsets.only(bottom: 18.0), // Reduced bottom padding
             child: Column(
               children: [
                 Row(
