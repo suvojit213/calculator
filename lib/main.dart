@@ -7,6 +7,113 @@ void main() {
   runApp(const CalculatorApp());
 }
 
+  }
+}
+
+class CalculatorButton extends StatefulWidget {
+  final String buttonValue;
+  final Color buttonColor;
+  final Color textColor;
+  final Widget? child;
+  final VoidCallback onPressed;
+  final bool isZeroButton;
+
+  const CalculatorButton({
+    Key? key,
+    required this.buttonValue,
+    required this.buttonColor,
+    required this.textColor,
+    this.child,
+    required this.onPressed,
+    this.isZeroButton = false,
+  }) : super(key: key);
+
+  @override
+  State<CalculatorButton> createState() => _CalculatorButtonState();
+}
+
+class _CalculatorButtonState extends State<CalculatorButton> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 100),
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.9).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onTapDown(TapDownDetails details) {
+    _controller.forward();
+  }
+
+  void _onTapUp(TapUpUpDetails details) {
+    _controller.reverse();
+  }
+
+  void _onTapCancel() {
+    _controller.reverse();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      flex: widget.isZeroButton ? 2 : 1,
+      child: Container(
+        margin: const EdgeInsets.all(7.5),
+        child: GestureDetector(
+          onTapDown: _onTapDown,
+          onTapUp: _onTapUp,
+          onTapCancel: _onTapCancel,
+          onTap: widget.onPressed,
+          child: ScaleTransition(
+            scale: _scaleAnimation,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: widget.buttonColor,
+                foregroundColor: widget.textColor,
+                shape: widget.isZeroButton
+                    ? RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(49.0),
+                      )
+                    : const CircleBorder(),
+                padding: widget.isZeroButton
+                    ? const EdgeInsets.symmetric(horizontal: 29, vertical: 19)
+                    : const EdgeInsets.all(19),
+                minimumSize: widget.isZeroButton
+                    ? const Size(168, 78)
+                    : const Size(78, 78),
+              ),
+              child: widget.child ??
+                  Align(
+                    alignment: widget.isZeroButton ? Alignment.centerLeft : Alignment.center,
+                    child: Text(
+                      widget.buttonValue,
+                      style: const TextStyle(
+                        fontSize: 34.0,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class CalculatorApp extends StatelessWidget {
   const CalculatorApp({super.key});
 
@@ -246,62 +353,24 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
       currentTextColor = buttonColor;
     }
 
-    return Expanded(
-      child: Container(
-        margin: const EdgeInsets.all(7.5),
-        child: ElevatedButton(
-          onPressed: () => _buttonPressed(buttonValue),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: currentButtonColor,
-            foregroundColor: currentTextColor,
-            shape: const CircleBorder(),
-            padding: const EdgeInsets.all(19),
-            minimumSize: const Size(78, 78),
-          ),
-          child: child ??
-              Text(
-                buttonValue,
-                style: const TextStyle(
-                  fontSize: 34.0,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-        ),
-      ),
+    return CalculatorButton(
+      buttonValue: buttonValue,
+      buttonColor: currentButtonColor,
+      textColor: currentTextColor,
+      onPressed: () => _buttonPressed(buttonValue),
+      child: child,
     );
   }
 
   Widget _buildZeroButton(String buttonValue, Color buttonColor, Color textColor,
       {Widget? child}) {
-    return Expanded(
-      flex: 2,
-      child: Container(
-        margin: const EdgeInsets.all(7.5),
-        child: ElevatedButton(
-          onPressed: () => _buttonPressed(buttonValue),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: buttonColor,
-            foregroundColor: textColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(49.0),
-            ),
-            padding:
-                const EdgeInsets.symmetric(horizontal: 29, vertical: 19),
-            minimumSize: const Size(168, 78),
-          ),
-          child: child ??
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  buttonValue,
-                  style: const TextStyle(
-                    fontSize: 34.0,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-        ),
-      ),
+    return CalculatorButton(
+      buttonValue: buttonValue,
+      buttonColor: buttonColor,
+      textColor: textColor,
+      onPressed: () => _buttonPressed(buttonValue),
+      child: child,
+      isZeroButton: true,
     );
   }
 
