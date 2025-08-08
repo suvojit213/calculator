@@ -384,11 +384,10 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                                 TextSpan(
                                   text: _expression.substring(0, _cursorPosition),
                                 ),
-                                if (_isCursorVisible)
-                                  const TextSpan(
-                                    text: "|",
-                                    style: TextStyle(color: Colors.orange),
-                                  ),
+                                TextSpan(
+                                  text: "|",
+                                  style: TextStyle(color: _isCursorVisible ? Colors.orange : Colors.transparent),
+                                ),
                                 TextSpan(
                                   text: _expression.substring(_cursorPosition),
                                 ),
