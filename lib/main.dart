@@ -40,6 +40,25 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
   String _selectedOperator = "";
   bool _isEditing = false;
   int _cursorPosition = 0;
+  bool _showCursor = false;
+  Timer? _cursorTimer;
+
+  void _startCursorTimer() {
+    _cursorTimer = Timer.periodic(const Duration(milliseconds: 500), (_) {
+      setState(() {
+        _showCursor = !_showCursor;
+      });
+    });
+  }
+
+  void _stopCursorTimer() {
+    _cursorTimer?.cancel();
+    setState(() {
+      _showCursor = false;
+    });
+  }
+  bool _showCursor = false;
+  Timer? _cursorTimer;
 
   void _buttonPressed(String buttonText) {
     setState(() {
@@ -338,19 +357,22 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                                       ..onTap = () {
                                         setState(() {
                                           _isEditing = true;
+                                          _startCursorTimer();
                                         });
                                       },
                                   ),
-                                  const TextSpan(
-                                    text: "|",
-                                    style: TextStyle(color: Colors.orange),
-                                  ),
+                                  if (_showCursor)
+                                    const TextSpan(
+                                      text: "|",
+                                      style: TextStyle(color: Colors.orange),
+                                    ),
                                   TextSpan(
                                     text: _expression.substring(_cursorPosition),
                                     recognizer: TapGestureRecognizer()
                                       ..onTap = () {
                                         setState(() {
                                           _isEditing = true;
+                                          _startCursorTimer();
                                         });
                                       },
                                   ),
