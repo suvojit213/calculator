@@ -55,7 +55,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
       _expression = ""; // Clear expression on 'C'
       _currentNumber = "";
       _isNewNumber = true;
-    } else if (buttonText == "+/- ") {
+    } else if (buttonText == "+/-") {
       if (_currentNumber.isNotEmpty && _currentNumber != "0") {
         if (_currentNumber.startsWith("-")) {
           _currentNumber = _currentNumber.substring(1);
@@ -68,7 +68,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
         _expression = _expression.replaceFirst(RegExp(r'\b' + _currentNumber.replaceAll("-", "") + r'\b'), _currentNumber); // Basic replacement
         _output = _currentNumber;
       }
-    } else if (buttonText == "% ") {
+    } else if (buttonText == "%") {
       if (_currentNumber.isNotEmpty) {
         double value = double.parse(_currentNumber);
         _currentNumber = (value / 100).toString();
@@ -315,20 +315,8 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
               children: [
                 Row(
                   children: <Widget>[
-                    _buildButton("AC", const Color(0xFFA5A5A5), Colors.black, child: const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text("A", style: TextStyle(fontSize: 35.0, fontWeight: FontWeight.w500)),
-                        Text("C", style: TextStyle(fontSize: 35.0, fontWeight: FontWeight.w500)),
-                      ],
-                    )),
-                    _buildButton("+/-", const Color(0xFFA5A5A5), Colors.black, child: const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text("+", style: TextStyle(fontSize: 35.0, fontWeight: FontWeight.w500)),
-                        Text("-", style: TextStyle(fontSize: 35.0, fontWeight: FontWeight.w500)),
-                      ],
-                    )),
+                    _buildButton("AC", const Color(0xFFA5A5A5), Colors.black),
+                    _buildButton("+/-", const Color(0xFFA5A5A5), Colors.black),
                     _buildButton("%", const Color(0xFFA5A5A5), Colors.black),
                     _buildButton("÷", const Color(0xFFF1A33B), Colors.white),
                   ],
