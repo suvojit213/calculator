@@ -413,28 +413,36 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                             _cursorPosition = position.offset;
                           });
                         },
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          reverse: true,
-                          child: RichText(
-                            text: TextSpan(
-                              style: TextStyle(
-                                fontSize: fontSize,
-                                fontWeight: FontWeight.w300,
-                                color: Colors.white,
+                        child: AnimatedDefaultTextStyle(
+                          duration: const Duration(milliseconds: 200),
+                          curve: Curves.easeOut,
+                          style: TextStyle(
+                            fontSize: fontSize,
+                            fontWeight: FontWeight.w300,
+                            color: Colors.white,
+                          ),
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            reverse: true,
+                            child: RichText(
+                              text: TextSpan(
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w300,
+                                  color: Colors.white,
+                                ),
+                                children: [
+                                  TextSpan(
+                                    text: _expression.substring(0, _cursorPosition),
+                                  ),
+                                  const TextSpan(
+                                    text: "|",
+                                    style: TextStyle(color: Colors.orange),
+                                  ),
+                                  TextSpan(
+                                    text: _expression.substring(_cursorPosition),
+                                  ),
+                                ],
                               ),
-                              children: [
-                                TextSpan(
-                                  text: _expression.substring(0, _cursorPosition),
-                                ),
-                                const TextSpan(
-                                  text: "|",
-                                  style: TextStyle(color: Colors.orange),
-                                ),
-                                TextSpan(
-                                  text: _expression.substring(_cursorPosition),
-                                ),
-                              ],
                             ),
                           ),
                         ),
