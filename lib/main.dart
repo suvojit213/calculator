@@ -41,6 +41,56 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
   bool _isNewNumber = true;
   String _selectedOperator = "";
   int _cursorPosition = 0;
+  String _realTimeOutput = "";
+
+  void _updateRealTimeOutput() {
+    try {
+      String finalExpression = _expression.replaceAll("×", "*").replaceAll("÷", "/");
+      // Simple check to ensure the expression is not empty and doesn't end with an operator
+      if (finalExpression.isNotEmpty && !"+-*/".contains(finalExpression.substring(finalExpression.length - 1))) {
+        List<String> parts = finalExpression.split(RegExp(r'[+\-*/]'));
+        List<String> operators =
+            finalExpression.replaceAll(RegExp(r'[0-9.]'), '').split('');
+
+        if (parts.isNotEmpty) {
+          double result = double.parse(parts[0]);
+          for (int i = 0; i < operators.length; i++) {
+            double nextNum = double.parse(parts[i + 1]);
+            switch (operators[i]) {
+              case "+":
+                result += nextNum;
+                break;
+              case "-":
+                result -= nextNum;
+                break;
+              case "*":
+                result *= nextNum;
+                break;
+              case "/":
+                if (nextNum != 0) {
+                  result /= nextNum;
+                } else {
+                  _realTimeOutput = "Error";
+                  return;
+                }
+                break;
+            }
+          }
+          String resultString = result.toString();
+          if (resultString.endsWith(".0")) {
+            resultString = resultString.substring(0, resultString.length - 2);
+          }
+          _realTimeOutput = resultString;
+        } else {
+          _realTimeOutput = "";
+        }
+      } else {
+        _realTimeOutput = "";
+      }
+    } catch (e) {
+      _realTimeOutput = "Error";
+    }
+  }
 
   void _buttonPressed(String buttonText) {
     setState(() {
@@ -183,6 +233,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
         _cursorPosition++;
       }
     });
+    _updateRealTimeOutput();
   }
 
   Widget _buildButton(String buttonValue, Color buttonColor, Color textColor,
@@ -264,58 +315,72 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
             child: Container(
               padding: const EdgeInsets.all(19.0),
               alignment: Alignment.bottomRight,
-              child: LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints constraints) {
-                  double fontSize = 88.0;
-                  if (_expression.length > 10 && _expression.length <= 15) {
-                    fontSize = 68.0;
-                  } else if (_expression.length > 15 &&
-                      _expression.length <= 20) {
-                    fontSize = 49.0;
-                  } else if (_expression.length > 20) {
-                    fontSize = 39.0;
-                  }
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  LayoutBuilder(
+                    builder: (BuildContext context, BoxConstraints constraints) {
+                      double fontSize = 88.0;
+                      if (_expression.length > 10 && _expression.length <= 15) {
+                        fontSize = 68.0;
+                      } else if (_expression.length > 15 &&
+                          _expression.length <= 20) {
+                        fontSize = 49.0;
+                      } else if (_expression.length > 20) {
+                        fontSize = 39.0;
+                      }
 
-                  return GestureDetector(
-                    onTapUp: (details) {
-                      final textSpan =
-                          TextSpan(text: _expression, style: TextStyle(fontSize: fontSize));
-                      final textPainter = TextPainter(
-                          text: textSpan, textDirection: TextDirection.ltr);
-                      textPainter.layout();
-                      final position =
-                          textPainter.getPositionForOffset(details.localPosition);
-                      setState(() {
-                        _cursorPosition = position.offset;
-                      });
-                    },
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      reverse: true,
-                      child: RichText(
-                        text: TextSpan(
-                          style: TextStyle(
-                            fontSize: fontSize,
-                            fontWeight: FontWeight.w300,
-                            color: Colors.white,
+                      return GestureDetector(
+                        onTapUp: (details) {
+                          final textSpan =
+                              TextSpan(text: _expression, style: TextStyle(fontSize: fontSize));
+                          final textPainter = TextPainter(
+                              text: textSpan, textDirection: TextDirection.ltr);
+                          textPainter.layout();
+                          final position =
+                              textPainter.getPositionForOffset(details.localPosition);
+                          setState(() {
+                            _cursorPosition = position.offset;
+                          });
+                        },
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          reverse: true,
+                          child: RichText(
+                            text: TextSpan(
+                              style: TextStyle(
+                                fontSize: fontSize,
+                                fontWeight: FontWeight.w300,
+                                color: Colors.white,
+                              ),
+                              children: [
+                                TextSpan(
+                                  text: _expression.substring(0, _cursorPosition),
+                                ),
+                                const TextSpan(
+                                  text: "|",
+                                  style: TextStyle(color: Colors.orange),
+                                ),
+                                TextSpan(
+                                  text: _expression.substring(_cursorPosition),
+                                ),
+                              ],
+                            ),
                           ),
-                          children: [
-                            TextSpan(
-                              text: _expression.substring(0, _cursorPosition),
-                            ),
-                            const TextSpan(
-                              text: "|",
-                              style: TextStyle(color: Colors.orange),
-                            ),
-                            TextSpan(
-                              text: _expression.substring(_cursorPosition),
-                            ),
-                          ],
                         ),
-                      ),
+                      );
+                    },
+                  ),
+                  Text(
+                    _realTimeOutput,
+                    style: const TextStyle(
+                      fontSize: 34.0,
+                      fontWeight: FontWeight.w300,
+                      color: Colors.grey,
                     ),
-                  );
-                },
+                  ),
+                ],
               ),
             ),
           ),
