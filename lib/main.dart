@@ -227,10 +227,18 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
         _selectedOperator = buttonText;
         _cursorPosition = _expression.length;
       } else {
+        if (_isNewNumber) {
+          _currentNumber = buttonText;
+          _isNewNumber = false;
+        } else {
+          _currentNumber += buttonText;
+        }
         _expression = _expression.substring(0, _cursorPosition) +
             buttonText +
             _expression.substring(_cursorPosition);
         _cursorPosition++;
+        _output = _currentNumber;
+        _selectedOperator = "";
       }
     });
     _updateRealTimeOutput();
