@@ -349,11 +349,9 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                     builder: (BuildContext context, BoxConstraints constraints) {
                       double fontSize = 88.0;
                       if (_expression.length > 15) {
-                        fontSize = 44.0;
-                      } else if (_expression.length > 10) {
-                        fontSize = 68.0;
-                      } else if (_expression.length > 5) {
-                        fontSize = 78.0;
+                        fontSize = 34.0;
+                      } else if (_expression.length > 7) {
+                        fontSize = 88.0 - (_expression.length - 7) * 4;
                       }
 
                       final span = TextSpan(text: _expression, style: TextStyle(fontSize: fontSize));
