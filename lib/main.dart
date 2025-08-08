@@ -37,6 +37,8 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
   String _operand = "";
   bool _isNewNumber = true;
   String _selectedOperator = ""; // New state variable for selected operator
+  bool _isEditing = false;
+  int _cursorPosition = 0;
 
   void _buttonPressed(String buttonText) {
     setState(() {
@@ -56,11 +58,20 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
       _currentNumber = "";
       _isNewNumber = true;
     } else if (buttonText == "⌫") {
-      if (_expression.isNotEmpty) {
-        _expression = _expression.substring(0, _expression.length - 1);
-        if (_currentNumber.isNotEmpty) {
-          _currentNumber = _currentNumber.substring(0, _currentNumber.length - 1);
-          _output = _currentNumber;
+      if (_isEditing) {
+        if (_cursorPosition > 0) {
+          setState(() {
+            _expression = _expression.substring(0, _cursorPosition - 1) + _expression.substring(_cursorPosition);
+            _cursorPosition--;
+          });
+        }
+      } else {
+        if (_expression.isNotEmpty) {
+          _expression = _expression.substring(0, _expression.length - 1);
+          if (_currentNumber.isNotEmpty) {
+            _currentNumber = _currentNumber.substring(0, _currentNumber.length - 1);
+            _output = _currentNumber;
+          }
         }
       }
     } else if (buttonText == "+/-") {
@@ -169,21 +180,28 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
         });
       }
     } else {
-      if (_isNewNumber) {
-        _currentNumber = buttonText;
-        if (_expression.isEmpty || _expression == _output) { // If starting a new calculation or after '=' pressed
-          _expression = buttonText; // Start new expression
-        } else if (_expression.endsWith("+") || _expression.endsWith("-") || _expression.endsWith("×") || _expression.endsWith("÷")) {
-          _expression += buttonText; // Append to expression after an operator
-        } else {
-          _expression = buttonText; // Overwrite if not an operator or empty
-        }
-        _isNewNumber = false;
+      if (_isEditing) {
+        setState(() {
+          _expression = _expression.substring(0, _cursorPosition) + buttonText + _expression.substring(_cursorPosition);
+          _cursorPosition++;
+        });
       } else {
-        _currentNumber += buttonText;
-        _expression += buttonText; // Append to expression
+        if (_isNewNumber) {
+          _currentNumber = buttonText;
+          if (_expression.isEmpty || _expression == _output) { // If starting a new calculation or after '=' pressed
+            _expression = buttonText; // Start new expression
+          } else if (_expression.endsWith("+") || _expression.endsWith("-") || _expression.endsWith("×") || _expression.endsWith("÷")) {
+            _expression += buttonText; // Append to expression after an operator
+          } else {
+            _expression = buttonText; // Overwrite if not an operator or empty
+          }
+          _isNewNumber = false;
+        } else {
+          _currentNumber += buttonText;
+          _expression += buttonText; // Append to expression
+        }
+        _output = _currentNumber;
       }
-      _output = _currentNumber;
     }
 
     setState(() {
@@ -298,16 +316,66 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                         fontSize = 39.0;
                       }
 
-                      return SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        reverse: true, // Show the end of the expression by default
-                        child: Text(
-                          _expression, // Display expression
-                          key: ValueKey<String>(_expression), // Key for AnimatedSwitcher
-                          style: TextStyle(
-                            fontSize: fontSize,
-                            fontWeight: FontWeight.w300,
-                            color: Colors.white,
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _isEditing = !_isEditing;
+                            _cursorPosition = _expression.length;
+                          });
+                        },
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          reverse: true, // Show the end of the expression by default
+                          child: RichText(
+                            key: ValueKey<String>(_expression), // Key for AnimatedSwitcher
+                            text: TextSpan(
+                              style: TextStyle(
+                                fontSize: fontSize,
+                                fontWeight: FontWeight.w300,
+                                color: Colors.white,
+                              ),
+                              children: _isEditing
+                                  ? [
+                                      TextSpan(
+                                        text: _expression.substring(0, _cursorPosition),
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () {
+                                            setState(() {
+                                              _isEditing = false;
+                                            });
+                                          },
+                                      ),
+                                      TextSpan(
+                                        text: "|",
+                                        style: TextStyle(color: Colors.orange),
+                                      ),
+                                      TextSpan(
+                                        text: _expression.substring(_cursorPosition),
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () {
+                                            setState(() {
+                                              _isEditing = false;
+                                            });
+                                          },
+                                      ),
+                                    ]
+                                  : [
+                                      TextSpan(
+                                        text: _expression,
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTapDown = (details) {
+                                            final textSpan = TextSpan(text: _expression, style: TextStyle(fontSize: fontSize));
+                                            final textPainter = TextPainter(text: textSpan, textDirection: TextDirection.ltr);
+                                            textPainter.layout();
+                                            final position = textPainter.getPositionForOffset(details.localPosition);
+                                            setState(() {
+                                              _cursorPosition = position.offset;
+                                            });
+                                          },
+                                      ),
+                                    ],
+                            ),
+                          ),
                           ),
                         ),
                       );
