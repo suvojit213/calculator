@@ -337,6 +337,12 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                         setState(() {
                           _cursorPosition = position.offset;
                         });
+                      } else {
+                        setState(() {
+                          _isEditing = true;
+                          _cursorPosition = _expression.length;
+                          _startCursorTimer();
+                        });
                       }
                     },
                     child: SingleChildScrollView(
