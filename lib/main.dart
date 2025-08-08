@@ -30,7 +30,8 @@ class CalculatorHomePage extends StatefulWidget {
 }
 
 class _CalculatorHomePageState extends State<CalculatorHomePage> {
-  String _output = "0";
+  String _output = "0"; // This will hold the result of the calculation
+  String _expression = ""; // This will hold the full expression
   String _currentNumber = "";
   double _num1 = 0.0;
   String _operand = "";
@@ -41,29 +42,38 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
     setState(() {
       _selectedOperator = ""; // Clear selected operator by default
     });
+
     if (buttonText == "AC") {
       _output = "0";
+      _expression = "";
       _currentNumber = "";
       _num1 = 0.0;
       _operand = "";
       _isNewNumber = true;
     } else if (buttonText == "C") {
       _output = "0";
+      _expression = ""; // Clear expression on 'C'
       _currentNumber = "";
       _isNewNumber = true;
-    } else if (buttonText == "+/-") {
+    } else if (buttonText == "+/- ") {
       if (_currentNumber.isNotEmpty && _currentNumber != "0") {
         if (_currentNumber.startsWith("-")) {
           _currentNumber = _currentNumber.substring(1);
         } else {
-          _currentNumber = "-$_currentNumber";
+          _currentNumber = "-" + _currentNumber;
         }
+        // Update expression with the new signed number
+        // This part needs to be smarter to replace the correct number in the expression
+        // For now, a simple replacement might not be accurate if the number appears multiple times
+        _expression = _expression.replaceFirst(RegExp(r'\b' + _currentNumber.replaceAll("-", "") + r'\b'), _currentNumber); // Basic replacement
         _output = _currentNumber;
       }
-    } else if (buttonText == "%") {
+    } else if (buttonText == "% ") {
       if (_currentNumber.isNotEmpty) {
         double value = double.parse(_currentNumber);
         _currentNumber = (value / 100).toString();
+        // Update expression with the percentage
+        _expression = _expression.replaceFirst(RegExp(r'\b' + (value * 100).toString() + r'\b'), _currentNumber); // Basic replacement
         _output = _currentNumber;
       }
     } else if (buttonText == ".") {
@@ -71,50 +81,81 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
         if (_isNewNumber) {
           _currentNumber = "0.";
           _isNewNumber = false;
+          _expression = "0."; // Start expression with "0."
         } else {
           _currentNumber += ".";
+          _expression += "."; // Append to expression
         }
         _output = _currentNumber;
       }
     } else if (buttonText == "=") {
-      if (_operand.isNotEmpty && _currentNumber.isNotEmpty) {
-        double num2 = double.parse(_currentNumber);
-        switch (_operand) {
-          case "+":
-            _num1 += num2;
-            break;
-          case "-":
-            _num1 -= num2;
-            break;
-          case "×":
-            _num1 *= num2;
-            break;
-          case "÷":
-            if (num2 != 0) {
-              _num1 /= num2;
-            } else {
-              _output = "Error";
-              _num1 = 0.0;
-              _currentNumber = "";
-              _operand = "";
-              _isNewNumber = true;
-              return;
+      try {
+        // Replace × with * and ÷ with / for evaluation
+        String finalExpression = _expression.replaceAll("×", "*").replaceAll("÷", "/");
+        // Evaluate the expression (simple approach, consider a math expression parser for complex cases)
+        // This is a very basic evaluation and might not handle operator precedence correctly.
+        // For a robust solution, a proper expression parser library should be used.
+        List<String> parts = finalExpression.split(RegExp(r'[+\-*/]'));
+        List<String> operators = finalExpression.replaceAll(RegExp(r'[0-9.]'), '').split('');
+
+        if (parts.length > 0) {
+          double result = double.parse(parts[0]);
+          for (int i = 0; i < operators.length; i++) {
+            double nextNum = double.parse(parts[i + 1]);
+            switch (operators[i]) {
+              case "+":
+                result += nextNum;
+                break;
+              case "-":
+                result -= nextNum;
+                break;
+              case "*":
+                result *= nextNum;
+                break;
+              case "/":
+                if (nextNum != 0) {
+                  result /= nextNum;
+                } else {
+                  _output = "Error";
+                  _expression = "Error";
+                  _num1 = 0.0;
+                  _currentNumber = "";
+                  _operand = "";
+                  _isNewNumber = true;
+                  return;
+                }
+                break;
             }
-            break;
+          }
+          _output = result.toString();
+          if (_output.endsWith(".0")) {
+            _output = _output.substring(0, _output.length - 2);
+          }
+          _expression = _output; // After '=', expression becomes the result
+          _currentNumber = _output;
+          _operand = "";
+          _isNewNumber = true;
         }
-        _output = _num1.toString();
-        if (_output.endsWith(".0")) {
-          _output = _output.substring(0, _output.length - 2);
-        }
-        _currentNumber = _output;
+      } catch (e) {
+        _output = "Error";
+        _expression = "Error";
+        _num1 = 0.0;
+        _currentNumber = "";
         _operand = "";
         _isNewNumber = true;
       }
     } else if (buttonText == "+" || buttonText == "-" || buttonText == "×" || buttonText == "÷") {
-      if (_currentNumber.isNotEmpty) {
-        _num1 = double.parse(_currentNumber);
+      if (_currentNumber.isNotEmpty || _expression.isNotEmpty) {
+        if (_isNewNumber && _expression.isNotEmpty && (_expression.endsWith("+") || _expression.endsWith("-") || _expression.endsWith("×") || _expression.endsWith("÷"))) {
+          // Replace last operator if a new one is pressed immediately after another operator
+          _expression = _expression.substring(0, _expression.length - 1) + buttonText;
+        } else {
+          _expression += buttonText; // Append operator to expression
+        }
+        _num1 = double.parse(_currentNumber.isEmpty ? _output : _currentNumber); // Use _output if _currentNumber is empty (e.g., after a calculation)
         _operand = buttonText;
         _isNewNumber = true;
+        _currentNumber = ""; // Clear current number after operator
         setState(() {
           _selectedOperator = buttonText; // Set selected operator
         });
@@ -122,18 +163,18 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
     } else {
       if (_isNewNumber) {
         _currentNumber = buttonText;
+        _expression = buttonText; // Start new expression
         _isNewNumber = false;
       } else {
         _currentNumber += buttonText;
+        _expression += buttonText; // Append to expression
       }
       _output = _currentNumber;
     }
 
     setState(() {
-      // Limit output length to prevent overflow
-      if (_output.length > 9) {
-        _output = double.parse(_output).toStringAsExponential(3);
-      }
+      // No longer limiting _output length here, as _expression is the primary display
+      // If _expression gets too long, consider using a FittedBox or scrolling text
     });
   }
 
@@ -211,12 +252,25 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
             child: Container(
               padding: const EdgeInsets.all(20.0),
               alignment: Alignment.bottomRight,
-              child: Text(
-                _output,
-                style: const TextStyle(
-                  fontSize: 90.0,
-                  fontWeight: FontWeight.w300,
-                  color: Colors.white,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300), // Animation duration
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  return SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0, 1), // Start from bottom
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: child,
+                  );
+                },
+                child: Text(
+                  _expression.isEmpty ? _output : _expression, // Display expression, or output if expression is empty
+                  key: ValueKey<String>(_expression.isEmpty ? _output : _expression), // Key for AnimatedSwitcher
+                  style: const TextStyle(
+                    fontSize: 90.0,
+                    fontWeight: FontWeight.w300,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
