@@ -351,15 +351,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                       if (_expression.length > 15) {
                         fontSize = 34.0;
                       } else if (_expression.length > 7) {
-                        fontSize = 88.0 - (_expression.length - 7) * 4;
-                      }
-
-                      final span = TextSpan(text: _expression, style: TextStyle(fontSize: fontSize));
-                      final tp = TextPainter(text: span, textDirection: TextDirection.ltr);
-                      tp.layout();
-
-                      if (tp.width > constraints.maxWidth) {
-                        fontSize = fontSize * constraints.maxWidth / tp.width;
+                        fontSize = 88.0 - (_expression.length - 7) * 6;
                       }
 
                       return GestureDetector(
