@@ -367,3 +367,159 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
               ],
             ),
           ),
+
+  Widget _buildZeroButton(String buttonValue, Color buttonColor, Color textColor, {Widget? child}) {
+    return Expanded(
+      flex: 2,
+      child: Container(
+        margin: const EdgeInsets.all(7.5), // Slightly reduced margin
+        child: ElevatedButton(
+          onPressed: () => _buttonPressed(buttonValue),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: buttonColor,
+            foregroundColor: textColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(49.0), // Adjusted for smaller size
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 29, vertical: 19), // Slightly reduced padding
+            minimumSize: const Size(168, 78), // Adjusted for smaller size
+          ),
+          child: child ?? Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              buttonValue,
+              style: const TextStyle(
+                fontSize: 34.0, // Slightly smaller font for buttons
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            flex: 2,
+            child: Container(
+              padding: const EdgeInsets.all(19.0), // Slightly reduced padding
+              alignment: Alignment.bottomRight,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300), // Animation duration
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: child,
+                  );
+                },
+                child: LayoutBuilder(
+                  builder: (BuildContext context, BoxConstraints constraints) {
+                    if (_expression.isEmpty) {
+                      // Display _output (the result) in a fixed, smaller size
+                      return Text(
+                        _output,
+                        key: ValueKey<String>(_output), // Key for AnimatedSwitcher
+                        style: const TextStyle(
+                          fontSize: 49.0, // Fixed smaller size for the result
+                          fontWeight: FontWeight.w300,
+                          color: Colors.white,
+                        ),
+                      );
+                    } else {
+                      // Display _expression with dynamic sizing and scrolling
+                      double fontSize = 88.0; // Adjusted initial font size
+                      if (_expression.length > 10 && _expression.length <= 15) {
+                        fontSize = 68.0;
+                      } else if (_expression.length > 15 && _expression.length <= 20) {
+                        fontSize = 49.0;
+                      } else if (_expression.length > 20) {
+                        fontSize = 39.0;
+                      }
+
+                      return SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        reverse: true, // Show the end of the expression by default
+                        child: Text(
+                          _expression, // Display expression
+                          key: ValueKey<String>(_expression), // Key for AnimatedSwitcher
+                          style: TextStyle(
+                            fontSize: fontSize,
+                            fontWeight: FontWeight.w300,
+                            color: Colors.white,
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 15.0), // Adjusted bottom padding for navigation bar
+            child: Column(
+              children: [
+                Row(
+                  children: <Widget>[
+                    _buildButton("AC", const Color(0xFFA5A5A5), Colors.black, child: const Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("A", style: TextStyle(fontSize: 35.0, fontWeight: FontWeight.w500)),
+                        Text("C", style: TextStyle(fontSize: 35.0, fontWeight: FontWeight.w500)),
+                      ],
+                    )),
+                    _buildButton("+/-", const Color(0xFFA5A5A5), Colors.black, child: const Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("+", style: TextStyle(fontSize: 35.0, fontWeight: FontWeight.w500)),
+                        Text("-", style: TextStyle(fontSize: 35.0, fontWeight: FontWeight.w500)),
+                      ],
+                    )),
+                    _buildButton("%", const Color(0xFFA5A5A5), Colors.black),
+                    _buildButton("÷", const Color(0xFFF1A33B), Colors.white),
+                  ],
+                ),
+                Row(
+                  children: <Widget>[
+                    _buildButton("7", const Color(0xFF333333), Colors.white),
+                    _buildButton("8", const Color(0xFF333333), Colors.white),
+                    _buildButton("9", const Color(0xFF333333), Colors.white),
+                    _buildButton("×", const Color(0xFFF1A33B), Colors.white),
+                  ],
+                ),
+                Row(
+                  children: <Widget>[
+                    _buildButton("4", const Color(0xFF333333), Colors.white),
+                    _buildButton("5", const Color(0xFF333333), Colors.white),
+                    _buildButton("6", const Color(0xFF333333), Colors.white),
+                    _buildButton("-", const Color(0xFFF1A33B), Colors.white),
+                  ],
+                ),
+                Row(
+                  children: <Widget>[
+                    _buildButton("1", const Color(0xFF333333), Colors.white),
+                    _buildButton("2", const Color(0xFF333333), Colors.white),
+                    _buildButton("3", const Color(0xFF333333), Colors.white),
+                    _buildButton("+", const Color(0xFFF1A33B), Colors.white),
+                  ],
+                ),
+                Row(
+                  children: <Widget>[
+                    _buildZeroButton("0", const Color(0xFF333333), Colors.white),
+                    _buildButton(".", const Color(0xFF333333), Colors.white),
+                    _buildButton("=", const Color(0xFFF1A33B), Colors.white),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ], // Close children list
+      ), // Close Column
+    ); // Close Scaffold
+  } // Close build method
+} // Close _CalculatorHomePageState class
