@@ -266,14 +266,31 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                     child: child,
                   );
                 },
-                child: Text(
-                  _expression.isEmpty ? _output : _expression, // Display expression, or output if expression is empty
-                  key: ValueKey<String>(_expression.isEmpty ? _output : _expression), // Key for AnimatedSwitcher
-                  style: const TextStyle(
-                    fontSize: 90.0,
-                    fontWeight: FontWeight.w300,
-                    color: Colors.white,
-                  ),
+                child: LayoutBuilder(
+                  builder: (BuildContext context, BoxConstraints constraints) {
+                    double fontSize = 90.0;
+                    if (_expression.length > 10 && _expression.length <= 15) {
+                      fontSize = 70.0;
+                    } else if (_expression.length > 15 && _expression.length <= 20) {
+                      fontSize = 50.0;
+                    } else if (_expression.length > 20) {
+                      fontSize = 40.0;
+                    }
+
+                    return SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      reverse: true, // Show the end of the expression by default
+                      child: Text(
+                        _expression.isEmpty ? _output : _expression, // Display expression, or output if expression is empty
+                        key: ValueKey<String>(_expression.isEmpty ? _output : _expression), // Key for AnimatedSwitcher
+                        style: TextStyle(
+                          fontSize: fontSize,
+                          fontWeight: FontWeight.w300,
+                          color: Colors.white,
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
