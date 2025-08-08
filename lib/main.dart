@@ -347,13 +347,21 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                 children: <Widget>[
                   LayoutBuilder(
                     builder: (BuildContext context, BoxConstraints constraints) {
-                      final span = TextSpan(text: _expression, style: const TextStyle(fontSize: 88.0));
+                      double fontSize = 88.0;
+                      if (_expression.length > 15) {
+                        fontSize = 44.0;
+                      } else if (_expression.length > 10) {
+                        fontSize = 68.0;
+                      } else if (_expression.length > 5) {
+                        fontSize = 78.0;
+                      }
+
+                      final span = TextSpan(text: _expression, style: TextStyle(fontSize: fontSize));
                       final tp = TextPainter(text: span, textDirection: TextDirection.ltr);
                       tp.layout();
 
-                      double fontSize = 88.0;
                       if (tp.width > constraints.maxWidth) {
-                        fontSize = 88.0 * constraints.maxWidth / tp.width;
+                        fontSize = fontSize * constraints.maxWidth / tp.width;
                       }
 
                       return GestureDetector(
