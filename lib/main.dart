@@ -63,7 +63,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
 
   void _updateRealTimeOutput() {
     try {
-      String finalExpression = _expression.replaceAll("×", "*").replaceAll("÷", "/");
+      String finalExpression = _expression.replaceAll("×", "*").replaceAll("÷", "/").replaceAll("%", "/100");
       // Simple check to ensure the expression is not empty and doesn't end with an operator
       if (finalExpression.isNotEmpty && !"+-*/".contains(finalExpression.substring(finalExpression.length - 1))) {
         List<String> parts = finalExpression.split(RegExp(r'[+\-*/]'));
@@ -73,6 +73,10 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
         if (parts.isNotEmpty) {
           double result = double.parse(parts[0]);
           for (int i = 0; i < operators.length; i++) {
+            if (operators[i] == "/100") {
+              result /= 100;
+              continue;
+            }
             double nextNum = double.parse(parts[i + 1]);
             switch (operators[i]) {
               case "+":
@@ -146,11 +150,8 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
         }
       } else if (buttonText == "%") {
         if (_currentNumber.isNotEmpty) {
-          double value = double.parse(_currentNumber);
-          String originalNumber = _currentNumber;
-          _currentNumber = (value / 100).toString();
-          _expression = _expression.substring(0, _expression.length - originalNumber.length) + _currentNumber;
-          _output = _currentNumber;
+          _expression += buttonText;
+          _updateRealTimeOutput();
         }
       } else if (buttonText == ".") {
         if (!_currentNumber.contains(".")) {
