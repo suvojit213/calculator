@@ -35,6 +35,7 @@ class CalculatorHomePage extends StatefulWidget {
 class _CalculatorHomePageState extends State<CalculatorHomePage> {
   String _output = "0";
   String _expression = "";
+  String _history = "";
   String _currentNumber = "";
   double _num1 = 0.0;
   String _operand = "";
@@ -209,6 +210,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
             _operand = "";
             _isNewNumber = true;
             _cursorPosition = _expression.length;
+            _history = finalExpression;
           }
         } catch (e) {
           _output = "Error";
@@ -223,6 +225,9 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
           buttonText == "-" ||
           buttonText == "×" ||
           buttonText == "÷") {
+        if (_isNewNumber && _operand.isNotEmpty) {
+          _history = _expression;
+        }
         if (_expression.isNotEmpty) {
           if (_expression.endsWith("+") ||
               _expression.endsWith("-") ||
@@ -248,12 +253,13 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
         if (_isNewNumber) {
           _currentNumber = buttonText;
           _isNewNumber = false;
+          _expression = buttonText;
         } else {
           _currentNumber += buttonText;
+          _expression = _expression.substring(0, _cursorPosition) +
+              buttonText +
+              _expression.substring(_cursorPosition);
         }
-        _expression = _expression.substring(0, _cursorPosition) +
-            buttonText +
-            _expression.substring(_cursorPosition);
         _cursorPosition++;
         _output = _currentNumber;
         _selectedOperator = "";
@@ -345,6 +351,14 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
+                  if (_history.isNotEmpty)
+                    Text(
+                      _history,
+                      style: const TextStyle(
+                        fontSize: 24.0,
+                        color: Colors.grey,
+                      ),
+                    ),
                   LayoutBuilder(
                     builder: (BuildContext context, BoxConstraints constraints) {
                       double fontSize = 88.0;
@@ -394,14 +408,6 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                         ),
                       );
                     },
-                  ),
-                  Text(
-                    _realTimeOutput,
-                    style: const TextStyle(
-                      fontSize: 34.0,
-                      fontWeight: FontWeight.w300,
-                      color: Colors.grey,
-                    ),
                   ),
                 ],
               ),
