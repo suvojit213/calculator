@@ -30,18 +30,6 @@ class CalculatorHomePage extends StatefulWidget {
 }
 
 class _CalculatorHomePageState extends State<CalculatorHomePage> {
-  @override
-  void initState() {
-    super.initState();
-    _focusNode.addListener(() {
-      if (!_focusNode.hasFocus) {
-        setState(() {
-          _isEditing = false;
-        });
-      }
-    });
-  }
-
   String _output = "0"; // This will hold the result of the calculation
   String _expression = ""; // This will hold the full expression
   String _currentNumber = "";
@@ -49,9 +37,6 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
   String _operand = "";
   bool _isNewNumber = true;
   String _selectedOperator = ""; // New state variable for selected operator
-  bool _isEditing = false;
-  final TextEditingController _expressionController = TextEditingController();
-  final FocusNode _focusNode = FocusNode();
 
   void _buttonPressed(String buttonText) {
     setState(() {
@@ -70,6 +55,14 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
       _expression = ""; // Clear expression on 'C'
       _currentNumber = "";
       _isNewNumber = true;
+    } else if (buttonText == "⌫") {
+      if (_expression.isNotEmpty) {
+        _expression = _expression.substring(0, _expression.length - 1);
+        if (_currentNumber.isNotEmpty) {
+          _currentNumber = _currentNumber.substring(0, _currentNumber.length - 1);
+          _output = _currentNumber;
+        }
+      }
     } else if (buttonText == "+/-") {
       if (_currentNumber.isNotEmpty && _currentNumber != "0") {
         if (_currentNumber.startsWith("-")) {
@@ -266,7 +259,6 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
       body: Column(
         children: <Widget>[
           Expanded(
@@ -284,86 +276,41 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                 },
                 child: LayoutBuilder(
                   builder: (BuildContext context, BoxConstraints constraints) {
-                    if (_isEditing) {
-                      return TextField(
-                        controller: _expressionController,
-                        focusNode: _focusNode,
-                        autofocus: true,
+                    if (_expression.isEmpty) {
+                      // Display _output (the result) in a fixed, smaller size
+                      return Text(
+                        _output,
+                        key: ValueKey<String>(_output), // Key for AnimatedSwitcher
                         style: const TextStyle(
-                          fontSize: 48.0,
+                          fontSize: 49.0, // Fixed smaller size for the result
                           fontWeight: FontWeight.w300,
                           color: Colors.white,
                         ),
-                        textAlign: TextAlign.right,
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          errorBorder: InputBorder.none,
-                          disabledBorder: InputBorder.none,
-                        ),
-                        onSubmitted: (value) {
-                          setState(() {
-                            _expression = value;
-                            _isEditing = false;
-                          });
-                        },
                       );
                     } else {
-                      if (_expression.isEmpty) {
-                        // Display _output (the result) in a fixed, smaller size
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _isEditing = true;
-                              _expressionController.text = _expression;
-                              _focusNode.requestFocus();
-                            });
-                          },
-                          child: Text(
-                            _output,
-                            key: ValueKey<String>(_output), // Key for AnimatedSwitcher
-                            style: const TextStyle(
-                              fontSize: 49.0, // Fixed smaller size for the result
-                              fontWeight: FontWeight.w300,
-                              color: Colors.white,
-                            ),
-                          ),
-                        );
-                      } else {
-                        // Display _expression with dynamic sizing and scrolling
-                        double fontSize = 88.0; // Adjusted initial font size
-                        if (_expression.length > 10 && _expression.length <= 15) {
-                          fontSize = 68.0;
-                        } else if (_expression.length > 15 && _expression.length <= 20) {
-                          fontSize = 49.0;
-                        } else if (_expression.length > 20) {
-                          fontSize = 39.0;
-                        }
-
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _isEditing = true;
-                              _expressionController.text = _expression;
-                              _focusNode.requestFocus();
-                            });
-                          },
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            reverse: true, // Show the end of the expression by default
-                            child: Text(
-                              _expression, // Display expression
-                              key: ValueKey<String>(_expression), // Key for AnimatedSwitcher
-                              style: TextStyle(
-                                fontSize: fontSize,
-                                fontWeight: FontWeight.w300,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        );
+                      // Display _expression with dynamic sizing and scrolling
+                      double fontSize = 88.0; // Adjusted initial font size
+                      if (_expression.length > 10 && _expression.length <= 15) {
+                        fontSize = 68.0;
+                      } else if (_expression.length > 15 && _expression.length <= 20) {
+                        fontSize = 49.0;
+                      } else if (_expression.length > 20) {
+                        fontSize = 39.0;
                       }
+
+                      return SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        reverse: true, // Show the end of the expression by default
+                        child: Text(
+                          _expression, // Display expression
+                          key: ValueKey<String>(_expression), // Key for AnimatedSwitcher
+                          style: TextStyle(
+                            fontSize: fontSize,
+                            fontWeight: FontWeight.w300,
+                            color: Colors.white,
+                          ),
+                        ),
+                      );
                     }
                   },
                 ),
@@ -377,7 +324,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                 Row(
                   children: <Widget>[
                     _buildButton("AC", const Color(0xFFA5A5A5), Colors.black),
-                    _buildButton("+/-", const Color(0xFFA5A5A5), Colors.black),
+                    _buildButton("⌫", const Color(0xFFA5A5A5), Colors.black),
                     _buildButton("%", const Color(0xFFA5A5A5), Colors.black),
                     _buildButton("÷", const Color(0xFFF1A33B), Colors.white),
                   ],
