@@ -147,9 +147,9 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
       } else if (buttonText == "%") {
         if (_currentNumber.isNotEmpty) {
           double value = double.parse(_currentNumber);
+          String originalNumber = _currentNumber;
           _currentNumber = (value / 100).toString();
-          _expression = _expression.replaceFirst(
-              RegExp(r'\b' + (value * 100).toString() + r'\b'), _currentNumber);
+          _expression = _expression.substring(0, _expression.length - originalNumber.length) + _currentNumber;
           _output = _currentNumber;
         }
       } else if (buttonText == ".") {
