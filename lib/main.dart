@@ -7,10 +7,7 @@ void main() {
   runApp(const CalculatorApp());
 }
 
-  }
-}
-
-class CalculatorButton extends StatefulWidget {
+  class CalculatorButton extends StatefulWidget {
   final String buttonValue;
   final Color buttonColor;
   final Color textColor;
@@ -58,7 +55,7 @@ class _CalculatorButtonState extends State<CalculatorButton> with SingleTickerPr
     _controller.forward();
   }
 
-  void _onTapUp(TapUpUpDetails details) {
+  void _onTapUp(TapUpDetails details) {
     _controller.reverse();
   }
 
@@ -80,6 +77,7 @@ class _CalculatorButtonState extends State<CalculatorButton> with SingleTickerPr
           child: ScaleTransition(
             scale: _scaleAnimation,
             child: ElevatedButton(
+              onPressed: null, // Handled by GestureDetector
               style: ElevatedButton.styleFrom(
                 backgroundColor: widget.buttonColor,
                 foregroundColor: widget.textColor,
