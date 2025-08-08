@@ -1,13 +1,16 @@
-name: Flutter Project Setup and Commit
+name: Android APK Build and Release
 
 on:
-  workflow_dispatch: # Manually trigger the workflow
+  push:
+    branches:
+      - main # Trigger on push to the main branch
 
 jobs:
-  setup_and_commit:
-    permissions:
-      contents: write
+  build_and_release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # For checking out code
+      
 
     steps:
     - name: Checkout repository
@@ -18,20 +21,20 @@ jobs:
       with:
         flutter-version: '3.x' # Use a specific Flutter version or 'stable'
 
-    - name: Create Flutter project
-      run: |
-        flutter create .
-      working-directory: ./ # Create project in the root of the repository
+    - name: Get Flutter dependencies
+      run: flutter pub get
 
-    - name: Configure Git
-      run: |
-        git config user.name "GitHub Actions Bot"
-        git config user.email "actions@github.com"
+    - name: Build Android APK
+      run: flutter build apk --release
 
-    - name: Commit and push Flutter files
-      run: |
-        git add .
-        git commit -m "feat: Initial Flutter project setup via GitHub Actions" || echo "No changes to commit"
-        git push
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/heads/main') # Only create release on main branch pushes
+      with:
+        files: build/app/outputs/flutter/app-release.apk
+        name: Release ${{ github.run_number }}
+        tag_name: v${{ github.run_number }}
+        body: | # Release notes
+          Automated release for build ${{ github.run_number }}
+          
+          This release includes the latest changes from the main branch.
