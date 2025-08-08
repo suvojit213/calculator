@@ -169,6 +169,21 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
       } else if (buttonText == "=") {
         try {
           String finalExpression = _expression.replaceAll("×", "*").replaceAll("÷", "/");
+          // Remove trailing operators
+          while (finalExpression.isNotEmpty && "+-*/".contains(finalExpression.substring(finalExpression.length - 1))) {
+            finalExpression = finalExpression.substring(0, finalExpression.length - 1);
+          }
+
+          if (finalExpression.isEmpty) {
+            _output = _currentNumber.isNotEmpty ? _currentNumber : "0";
+            _expression = _output;
+            _currentNumber = _output;
+            _operand = "";
+            _isNewNumber = true;
+            _cursorPosition = _expression.length;
+            return;
+          }
+
           List<String> parts = finalExpression.split(RegExp(r'[+\-*/]'));
           List<String> operators =
               finalExpression.replaceAll(RegExp(r'[0-9.]'), '').split('');
