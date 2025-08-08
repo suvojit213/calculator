@@ -35,8 +35,12 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
   double _num1 = 0.0;
   String _operand = "";
   bool _isNewNumber = true;
+  String _selectedOperator = ""; // New state variable for selected operator
 
   void _buttonPressed(String buttonText) {
+    setState(() {
+      _selectedOperator = ""; // Clear selected operator by default
+    });
     if (buttonText == "AC") {
       _output = "0";
       _currentNumber = "";
@@ -111,6 +115,9 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
         _num1 = double.parse(_currentNumber);
         _operand = buttonText;
         _isNewNumber = true;
+        setState(() {
+          _selectedOperator = buttonText; // Set selected operator
+        });
       }
     } else {
       if (_isNewNumber) {
@@ -131,14 +138,22 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
   }
 
   Widget _buildButton(String buttonText, Color buttonColor, Color textColor) {
+    Color currentButtonColor = buttonColor;
+    Color currentTextColor = textColor;
+
+    if (buttonText == _selectedOperator) {
+      currentButtonColor = textColor; // Swap colors for highlight
+      currentTextColor = buttonColor; // Swap colors for highlight
+    }
+
     return Expanded(
       child: Container(
         margin: const EdgeInsets.all(8.0),
         child: ElevatedButton(
           onPressed: () => _buttonPressed(buttonText),
           style: ElevatedButton.styleFrom(
-            backgroundColor: buttonColor,
-            foregroundColor: textColor,
+            backgroundColor: currentButtonColor,
+            foregroundColor: currentTextColor,
             shape: const CircleBorder(),
             padding: const EdgeInsets.all(20),
             minimumSize: const Size(80, 80), // Ensure buttons are circular
