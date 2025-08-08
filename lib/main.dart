@@ -40,25 +40,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
   String _operand = "";
   bool _isNewNumber = true;
   String _selectedOperator = "";
-  bool _isEditing = false;
   int _cursorPosition = 0;
-  bool _showCursor = false;
-  Timer? _cursorTimer;
-
-  void _startCursorTimer() {
-    _cursorTimer = Timer.periodic(const Duration(milliseconds: 500), (_) {
-      setState(() {
-        _showCursor = !_showCursor;
-      });
-    });
-  }
-
-  void _stopCursorTimer() {
-    _cursorTimer?.cancel();
-    setState(() {
-      _showCursor = false;
-    });
-  }
 
   void _buttonPressed(String buttonText) {
     setState(() {
@@ -69,31 +51,18 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
         _num1 = 0.0;
         _operand = "";
         _isNewNumber = true;
-        _isEditing = false;
-        _stopCursorTimer();
+        _cursorPosition = 0;
       } else if (buttonText == "C") {
         _output = "0";
         _expression = "";
         _currentNumber = "";
         _isNewNumber = true;
-        _isEditing = false;
-        _stopCursorTimer();
+        _cursorPosition = 0;
       } else if (buttonText == "⌫") {
-        if (_isEditing) {
-          if (_cursorPosition > 0) {
-            _expression = _expression.substring(0, _cursorPosition - 1) +
-                _expression.substring(_cursorPosition);
-            _cursorPosition--;
-          }
-        } else {
-          if (_expression.isNotEmpty) {
-            _expression = _expression.substring(0, _expression.length - 1);
-            if (_currentNumber.isNotEmpty) {
-              _currentNumber =
-                  _currentNumber.substring(0, _currentNumber.length - 1);
-              _output = _currentNumber;
-            }
-          }
+        if (_cursorPosition > 0) {
+          _expression = _expression.substring(0, _cursorPosition - 1) +
+              _expression.substring(_cursorPosition);
+          _cursorPosition--;
         }
       } else if (buttonText == "+/-") {
         if (_currentNumber.isNotEmpty && _currentNumber != "0") {
@@ -171,8 +140,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
             _currentNumber = _output;
             _operand = "";
             _isNewNumber = true;
-            _isEditing = false;
-            _stopCursorTimer();
+            _cursorPosition = _expression.length;
           }
         } catch (e) {
           _output = "Error";
@@ -181,8 +149,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
           _currentNumber = "";
           _operand = "";
           _isNewNumber = true;
-          _isEditing = false;
-          _stopCursorTimer();
+          _cursorPosition = _expression.length;
         }
       } else if (buttonText == "+" ||
           buttonText == "-" ||
@@ -208,31 +175,10 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
           _selectedOperator = buttonText;
         }
       } else {
-        if (_isEditing) {
-          _expression = _expression.substring(0, _cursorPosition) +
-              buttonText +
-              _expression.substring(_cursorPosition);
-          _cursorPosition++;
-        } else {
-          if (_isNewNumber) {
-            _currentNumber = buttonText;
-            if (_expression.isEmpty || _expression == _output) {
-              _expression = buttonText;
-            } else if (_expression.endsWith("+") ||
-                _expression.endsWith("-") ||
-                _expression.endsWith("×") ||
-                _expression.endsWith("÷")) {
-              _expression += buttonText;
-            } else {
-              _expression = buttonText;
-            }
-            _isNewNumber = false;
-          } else {
-            _currentNumber += buttonText;
-            _expression += buttonText;
-          }
-          _output = _currentNumber;
-        }
+        _expression = _expression.substring(0, _cursorPosition) +
+            buttonText +
+            _expression.substring(_cursorPosition);
+        _cursorPosition++;
       }
     });
   }
@@ -330,24 +276,16 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
 
                   return GestureDetector(
                     onTapUp: (details) {
-                      if (_isEditing) {
-                        final textSpan = TextSpan(
-                            text: _expression, style: TextStyle(fontSize: fontSize));
-                        final textPainter = TextPainter(
-                            text: textSpan, textDirection: TextDirection.ltr);
-                        textPainter.layout();
-                        final position =
-                            textPainter.getPositionForOffset(details.localPosition);
-                        setState(() {
-                          _cursorPosition = position.offset;
-                        });
-                      } else {
-                        setState(() {
-                          _isEditing = true;
-                          _cursorPosition = _expression.length;
-                          _startCursorTimer();
-                        });
-                      }
+                      final textSpan =
+                          TextSpan(text: _expression, style: TextStyle(fontSize: fontSize));
+                      final textPainter = TextPainter(
+                          text: textSpan, textDirection: TextDirection.ltr);
+                      textPainter.layout();
+                      final position =
+                          textPainter.getPositionForOffset(details.localPosition);
+                      setState(() {
+                        _cursorPosition = position.offset;
+                      });
                     },
                     child: SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
@@ -359,47 +297,18 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                             fontWeight: FontWeight.w300,
                             color: Colors.white,
                           ),
-                          children: _isEditing
-                              ? [
-                                  TextSpan(
-                                    text: _expression.substring(0, _cursorPosition),
-                                    recognizer: TapGestureRecognizer()
-                                      ..onTap = () {
-                                        setState(() {
-                                          _isEditing = true;
-                                          _startCursorTimer();
-                                        });
-                                      },
-                                  ),
-                                  if (_showCursor)
-                                    const TextSpan(
-                                      text: "|",
-                                      style: TextStyle(color: Colors.orange),
-                                    ),
-                                  TextSpan(
-                                    text: _expression.substring(_cursorPosition),
-                                    recognizer: TapGestureRecognizer()
-                                      ..onTap = () {
-                                        setState(() {
-                                          _isEditing = true;
-                                          _startCursorTimer();
-                                        });
-                                      },
-                                  ),
-                                ]
-                              : [
-                                  TextSpan(
-                                    text: _expression,
-                                    recognizer: TapGestureRecognizer()
-                                      ..onTap = () {
-                                        setState(() {
-                                          _isEditing = true;
-                                          _cursorPosition = _expression.length;
-                                          _startCursorTimer();
-                                        });
-                                      },
-                                  ),
-                                ],
+                          children: [
+                            TextSpan(
+                              text: _expression.substring(0, _cursorPosition),
+                            ),
+                            const TextSpan(
+                              text: "|",
+                              style: TextStyle(color: Colors.orange),
+                            ),
+                            TextSpan(
+                              text: _expression.substring(_cursorPosition),
+                            ),
+                          ],
                         ),
                       ),
                     ),
