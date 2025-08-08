@@ -155,25 +155,27 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
           buttonText == "-" ||
           buttonText == "×" ||
           buttonText == "÷") {
-        if (_currentNumber.isNotEmpty || _expression.isNotEmpty) {
-          if (_isNewNumber &&
-              _expression.isNotEmpty &&
-              (_expression.endsWith("+") ||
-                  _expression.endsWith("-") ||
-                  _expression.endsWith("×") ||
-                  _expression.endsWith("÷"))) {
-            _expression =
-                _expression.substring(0, _expression.length - 1) + buttonText;
-          } else if (_currentNumber.isNotEmpty) {
+        if (_expression.isNotEmpty) {
+          if (_expression.endsWith("+") ||
+              _expression.endsWith("-") ||
+              _expression.endsWith("×") ||
+              _expression.endsWith("÷")) {
+            _expression = _expression.substring(0, _expression.length - 1) + buttonText;
+          } else {
             _expression += buttonText;
           }
-          _num1 = double.parse(
-              _currentNumber.isEmpty ? _output : _currentNumber);
-          _operand = buttonText;
-          _isNewNumber = true;
-          _currentNumber = "";
-          _selectedOperator = buttonText;
+        } else if (_currentNumber.isNotEmpty) {
+          _expression = _currentNumber + buttonText;
+        } else {
+          _expression = _output + buttonText;
         }
+
+        _num1 = double.parse(_output);
+        _operand = buttonText;
+        _isNewNumber = true;
+        _currentNumber = "";
+        _selectedOperator = buttonText;
+        _cursorPosition = _expression.length;
       } else {
         _expression = _expression.substring(0, _cursorPosition) +
             buttonText +
