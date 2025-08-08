@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 
 void main() {
   runApp(const CalculatorApp());
@@ -338,12 +339,6 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                                   ? [
                                       TextSpan(
                                         text: _expression.substring(0, _cursorPosition),
-                                        recognizer: TapGestureRecognizer()
-                                          ..onTap = () {
-                                            setState(() {
-                                              _isEditing = false;
-                                            });
-                                          },
                                       ),
                                       TextSpan(
                                         text: "|",
@@ -351,31 +346,17 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                                       ),
                                       TextSpan(
                                         text: _expression.substring(_cursorPosition),
-                                        recognizer: TapGestureRecognizer()
-                                          ..onTap = () {
-                                            setState(() {
-                                              _isEditing = false;
-                                            });
-                                          },
                                       ),
                                     ]
                                   : [
                                       TextSpan(
                                         text: _expression,
-                                        recognizer: TapGestureRecognizer()
-                                          ..onTapDown = (details) {
-                                            final textSpan = TextSpan(text: _expression, style: TextStyle(fontSize: fontSize));
-                                            final textPainter = TextPainter(text: textSpan, textDirection: TextDirection.ltr);
-                                            textPainter.layout();
-                                            final position = textPainter.getPositionForOffset(details.localPosition);
-                                            setState(() {
-                                              _cursorPosition = position.offset;
-                                            });
-                                          },
                                       ),
                                     ],
                             ),
                           ),
+                        ),
+                      );
                           ),
                         ),
                       );
