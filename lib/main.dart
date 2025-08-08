@@ -393,7 +393,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                     _buildButton("AC", const Color(0xFFA5A5A5), Colors.black),
                     _buildButton("⌫", const Color(0xFFA5A5A5), Colors.black),
                     _buildButton("%", const Color(0xFFA5A5A5), Colors.black),
-                    _buildButton("÷", const Color(0xFFF1A33B), Colors.white),
+                    _buildButton("÷", const Color(0xFFFF9500), Colors.white),
                   ],
                 ),
                 Row(
@@ -401,7 +401,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                     _buildButton("7", const Color(0xFF333333), Colors.white),
                     _buildButton("8", const Color(0xFF333333), Colors.white),
                     _buildButton("9", const Color(0xFF333333), Colors.white),
-                    _buildButton("×", const Color(0xFFF1A33B), Colors.white),
+                    _buildButton("×", const Color(0xFFFF9500), Colors.white),
                   ],
                 ),
                 Row(
@@ -409,7 +409,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                     _buildButton("4", const Color(0xFF333333), Colors.white),
                     _buildButton("5", const Color(0xFF333333), Colors.white),
                     _buildButton("6", const Color(0xFF333333), Colors.white),
-                    _buildButton("-", const Color(0xFFF1A33B), Colors.white),
+                    _buildButton("-", const Color(0xFFFF9500), Colors.white),
                   ],
                 ),
                 Row(
@@ -417,14 +417,14 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                     _buildButton("1", const Color(0xFF333333), Colors.white),
                     _buildButton("2", const Color(0xFF333333), Colors.white),
                     _buildButton("3", const Color(0xFF333333), Colors.white),
-                    _buildButton("+", const Color(0xFFF1A33B), Colors.white),
+                    _buildButton("+", const Color(0xFFFF9500), Colors.white),
                   ],
                 ),
                 Row(
                   children: <Widget>[
                     _buildZeroButton("0", const Color(0xFF333333), Colors.white),
                     _buildButton(".", const Color(0xFF333333), Colors.white),
-                    _buildButton("=", const Color(0xFFF1A33B), Colors.white),
+                    _buildButton("=", const Color(0xFFFF9500), Colors.white),
                   ],
                 ),
               ],
