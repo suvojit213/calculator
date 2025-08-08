@@ -137,11 +137,11 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
     });
   }
 
-  Widget _buildButton(String buttonText, Color buttonColor, Color textColor) {
+  Widget _buildButton(String buttonValue, Color buttonColor, Color textColor, {Widget? child}) {
     Color currentButtonColor = buttonColor;
     Color currentTextColor = textColor;
 
-    if (buttonText == _selectedOperator) {
+    if (buttonValue == _selectedOperator) {
       currentButtonColor = textColor; // Swap colors for highlight
       currentTextColor = buttonColor; // Swap colors for highlight
     }
@@ -150,7 +150,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
       child: Container(
         margin: const EdgeInsets.all(8.0),
         child: ElevatedButton(
-          onPressed: () => _buttonPressed(buttonText),
+          onPressed: () => _buttonPressed(buttonValue),
           style: ElevatedButton.styleFrom(
             backgroundColor: currentButtonColor,
             foregroundColor: currentTextColor,
@@ -158,8 +158,8 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
             padding: const EdgeInsets.all(20),
             minimumSize: const Size(80, 80), // Ensure buttons are circular
           ),
-          child: Text(
-            buttonText,
+          child: child ?? Text(
+            buttonValue,
             style: const TextStyle(
               fontSize: 35.0,
               fontWeight: FontWeight.w500,
@@ -170,13 +170,13 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
     );
   }
 
-  Widget _buildZeroButton(String buttonText, Color buttonColor, Color textColor) {
+  Widget _buildZeroButton(String buttonValue, Color buttonColor, Color textColor, {Widget? child}) {
     return Expanded(
       flex: 2,
       child: Container(
         margin: const EdgeInsets.all(8.0),
         child: ElevatedButton(
-          onPressed: () => _buttonPressed(buttonText),
+          onPressed: () => _buttonPressed(buttonValue),
           style: ElevatedButton.styleFrom(
             backgroundColor: buttonColor,
             foregroundColor: textColor,
@@ -186,10 +186,10 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
             padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
             minimumSize: const Size(170, 80), // Wider for zero
           ),
-          child: Align(
+          child: child ?? Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              buttonText,
+              buttonValue,
               style: const TextStyle(
                 fontSize: 35.0,
                 fontWeight: FontWeight.w500,
@@ -225,8 +225,20 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
             children: [
               Row(
                 children: <Widget>[
-                  _buildButton("AC", const Color(0xFFA5A5A5), Colors.black),
-                  _buildButton("+/-", const Color(0xFFA5A5A5), Colors.black),
+                  _buildButton("AC", const Color(0xFFA5A5A5), Colors.black, child: const Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text("A", style: TextStyle(fontSize: 35.0, fontWeight: FontWeight.w500)),
+                      Text("C", style: TextStyle(fontSize: 35.0, fontWeight: FontWeight.w500)),
+                    ],
+                  )),
+                  _buildButton("+/-", const Color(0xFFA5A5A5), Colors.black, child: const Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text("+", style: TextStyle(fontSize: 35.0, fontWeight: FontWeight.w500)),
+                      Text("-", style: TextStyle(fontSize: 35.0, fontWeight: FontWeight.w500)),
+                    ],
+                  )),
                   _buildButton("%", const Color(0xFFA5A5A5), Colors.black),
                   _buildButton("÷", const Color(0xFFF1A33B), Colors.white),
                 ],
