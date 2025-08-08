@@ -61,22 +61,24 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
     super.dispose();
   }
 
-  void _updateRealTimeOutput() {
+  """  void _updateRealTimeOutput() {
     try {
       String finalExpression = _expression.replaceAll("×", "*").replaceAll("÷", "/").replaceAll("%", "/100");
-      // Simple check to ensure the expression is not empty and doesn't end with an operator
-      if (finalExpression.isNotEmpty && !"+-*/".contains(finalExpression.substring(finalExpression.length - 1))) {
+      if (finalExpression.isNotEmpty &&
+          !'+-*/'.contains(finalExpression.substring(finalExpression.length - 1)) &&
+          finalExpression.contains(RegExp(r'[+\-*/]'))) {
         List<String> parts = finalExpression.split(RegExp(r'[+\-*/]'));
         List<String> operators =
             finalExpression.replaceAll(RegExp(r'[0-9.]'), '').split('');
 
-        if (parts.isNotEmpty) {
+        if (parts.length > 1) {
           double result = double.parse(parts[0]);
           for (int i = 0; i < operators.length; i++) {
             if (operators[i] == "/100") {
               result /= 100;
               continue;
             }
+            if (parts[i + 1].isEmpty) continue;
             double nextNum = double.parse(parts[i + 1]);
             switch (operators[i]) {
               case "+":
@@ -112,7 +114,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
     } catch (e) {
       _realTimeOutput = "Error";
     }
-  }
+  }""
 
   void _buttonPressed(String buttonText) {
     setState(() {
@@ -399,7 +401,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                         child: SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           reverse: true,
-                          padding: const EdgeInsets.only(left: 20.0),
+                          padding: const EdgeInsets.only(right: 20.0),
                           child: RichText(
                             text: TextSpan(
                               style: TextStyle(
