@@ -266,6 +266,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Column(
         children: <Widget>[
           Expanded(
