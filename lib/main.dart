@@ -1,7 +1,5 @@
-import 'dart:async';
-
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'dart:math';
 
 void main() {
   runApp(const CalculatorApp());
@@ -14,427 +12,283 @@ class CalculatorApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Calculator',
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        primaryColor: Colors.black,
-        scaffoldBackgroundColor: Colors.black,
-        fontFamily: 'Helvetica Neue',
-      ),
-      home: const CalculatorHomePage(),
+      theme: ThemeData.dark(),
+      home: const CalculatorPage(),
     );
   }
 }
 
-class CalculatorHomePage extends StatefulWidget {
-  const CalculatorHomePage({super.key});
+class CalculatorPage extends StatefulWidget {
+  const CalculatorPage({super.key});
 
   @override
-  State<CalculatorHomePage> createState() => _CalculatorHomePageState();
+  State<CalculatorPage> createState() => _CalculatorPageState();
 }
 
-class _CalculatorHomePageState extends State<CalculatorHomePage> {
-  String _output = "0";
-  String _expression = "";
-  String _currentNumber = "";
-  double _num1 = 0.0;
-  String _operand = "";
-  bool _isNewNumber = true;
-  String _selectedOperator = "";
-  int _cursorPosition = 0;
-  String _realTimeOutput = "";
-
-  void _updateRealTimeOutput() {
-    try {
-      String finalExpression = _expression.replaceAll("×", "*").replaceAll("÷", "/");
-      // Simple check to ensure the expression is not empty and doesn't end with an operator
-      if (finalExpression.isNotEmpty && !"+-*/".contains(finalExpression.substring(finalExpression.length - 1))) {
-        List<String> parts = finalExpression.split(RegExp(r'[+\-*/]'));
-        List<String> operators =
-            finalExpression.replaceAll(RegExp(r'[0-9.]'), '').split('');
-
-        if (parts.isNotEmpty) {
-          double result = double.parse(parts[0]);
-          for (int i = 0; i < operators.length; i++) {
-            double nextNum = double.parse(parts[i + 1]);
-            switch (operators[i]) {
-              case "+":
-                result += nextNum;
-                break;
-              case "-":
-                result -= nextNum;
-                break;
-              case "*":
-                result *= nextNum;
-                break;
-              case "/":
-                if (nextNum != 0) {
-                  result /= nextNum;
-                } else {
-                  _realTimeOutput = "Error";
-                  return;
-                }
-                break;
-            }
-          }
-          String resultString = result.toString();
-          if (resultString.endsWith(".0")) {
-            resultString = resultString.substring(0, resultString.length - 2);
-          }
-          _realTimeOutput = resultString;
-        } else {
-          _realTimeOutput = "";
-        }
-      } else {
-        _realTimeOutput = "";
-      }
-    } catch (e) {
-      _realTimeOutput = "Error";
-    }
-  }
+class _CalculatorPageState extends State<CalculatorPage> {
+  String _output = '0';
+  String _currentInput = '';
+  double _num1 = 0;
+  String _operator = '';
+  bool _isScientific = true;
 
   void _buttonPressed(String buttonText) {
     setState(() {
-      if (buttonText == "AC") {
-        _output = "0";
-        _expression = "";
-        _currentNumber = "";
-        _num1 = 0.0;
-        _operand = "";
-        _isNewNumber = true;
-        _cursorPosition = 0;
-      } else if (buttonText == "C") {
-        _output = "0";
-        _expression = "";
-        _currentNumber = "";
-        _isNewNumber = true;
-        _cursorPosition = 0;
-      } else if (buttonText == "⌫") {
-        if (_cursorPosition > 0) {
-          _expression = _expression.substring(0, _cursorPosition - 1) +
-              _expression.substring(_cursorPosition);
-          _cursorPosition--;
+      if (buttonText == 'AC') {
+        _output = '0';
+        _currentInput = '';
+        _num1 = 0;
+        _operator = '';
+      } else if (buttonText == '+' ||
+          buttonText == '-' ||
+          buttonText == 'x' ||
+          buttonText == '÷') {
+        if (_currentInput.isNotEmpty) {
+          _num1 = double.parse(_currentInput);
+          _operator = buttonText;
+          _currentInput = '';
         }
-      } else if (buttonText == "+/-") {
-        if (_currentNumber.isNotEmpty && _currentNumber != "0") {
-          if (_currentNumber.startsWith("-")) {
-            _currentNumber = _currentNumber.substring(1);
-          } else {
-            _currentNumber = "-" + _currentNumber;
+      } else if (buttonText == '=') {
+        if (_currentInput.isNotEmpty && _operator.isNotEmpty) {
+          double num2 = double.parse(_currentInput);
+          double result = 0;
+          if (_operator == '+') {
+            result = _num1 + num2;
+          } else if (_operator == '-') {
+            result = _num1 - num2;
+          } else if (_operator == 'x') {
+            result = _num1 * num2;
+          } else if (_operator == '÷') {
+            result = _num1 / num2;
           }
-          _expression = _expression.replaceFirst(
-              RegExp(r'\b' + _currentNumber.replaceAll("-", "") + r'\b'),
-              _currentNumber);
-          _output = _currentNumber;
+          _output = result.toString();
+          _num1 = result;
+          _currentInput = '';
+          _operator = '';
         }
-      } else if (buttonText == "%") {
-        if (_currentNumber.isNotEmpty) {
-          double value = double.parse(_currentNumber);
-          _currentNumber = (value / 100).toString();
-          _expression = _expression.replaceFirst(
-              RegExp(r'\b' + (value * 100).toString() + r'\b'), _currentNumber);
-          _output = _currentNumber;
+      } else if (buttonText == '.') {
+        if (!_currentInput.contains('.')) {
+          _currentInput += buttonText;
+          _output = _currentInput;
         }
-      } else if (buttonText == ".") {
-        if (!_currentNumber.contains(".")) {
-          if (_isNewNumber) {
-            _currentNumber = "0.";
-            _isNewNumber = false;
-            _expression = "0.";
-          } else {
-            _currentNumber += ".";
-            _expression += ".";
-          }
-          _output = _currentNumber;
-        }
-      } else if (buttonText == "=") {
-        try {
-          String finalExpression = _expression.replaceAll("×", "*").replaceAll("÷", "/");
-          List<String> parts = finalExpression.split(RegExp(r'[+\-*/]'));
-          List<String> operators =
-              finalExpression.replaceAll(RegExp(r'[0-9.]'), '').split('');
-
-          if (parts.isNotEmpty) {
-            double result = double.parse(parts[0]);
-            for (int i = 0; i < operators.length; i++) {
-              double nextNum = double.parse(parts[i + 1]);
-              switch (operators[i]) {
-                case "+":
-                  result += nextNum;
-                  break;
-                case "-":
-                  result -= nextNum;
-                  break;
-                case "*":
-                  result *= nextNum;
-                  break;
-                case "/":
-                  if (nextNum != 0) {
-                    result /= nextNum;
-                  } else {
-                    _output = "Error";
-                    _expression = "Error";
-                    _num1 = 0.0;
-                    _currentNumber = "";
-                    _operand = "";
-                    _isNewNumber = true;
-                    return;
-                  }
-                  break;
-              }
-            }
-            _output = result.toString();
-            if (_output.endsWith(".0")) {
-              _output = _output.substring(0, _output.length - 2);
-            }
-            _expression = _output;
-            _currentNumber = _output;
-            _operand = "";
-            _isNewNumber = true;
-            _cursorPosition = _expression.length;
-          }
-        } catch (e) {
-          _output = "Error";
-          _expression = "Error";
-          _num1 = 0.0;
-          _currentNumber = "";
-          _operand = "";
-          _isNewNumber = true;
-          _cursorPosition = _expression.length;
-        }
-      } else if (buttonText == "+" ||
-          buttonText == "-" ||
-          buttonText == "×" ||
-          buttonText == "÷") {
-        if (_expression.isNotEmpty) {
-          if (_expression.endsWith("+") ||
-              _expression.endsWith("-") ||
-              _expression.endsWith("×") ||
-              _expression.endsWith("÷")) {
-            _expression = _expression.substring(0, _expression.length - 1) + buttonText;
-          } else {
-            _expression += buttonText;
-          }
-        } else if (_currentNumber.isNotEmpty) {
-          _expression = _currentNumber + buttonText;
+      } else if (
+          buttonText == '(' || buttonText == ')' ||
+          buttonText == 'mc' || buttonText == 'm+' || buttonText == 'm-' || buttonText == 'mr' ||
+          buttonText == '2nd' || buttonText == 'x²' || buttonText == 'x³' || buttonText == 'xʸ' || buttonText == 'eˣ' || buttonText == '10ˣ' ||
+          buttonText == '¹/ₓ' || buttonText == '²√x' || buttonText == '³√x' || buttonText == 'ʸ√x' || buttonText == 'ln' || buttonText == 'log₁₀' ||
+          buttonText == 'x!' || buttonText == 'sin' || buttonText == 'cos' || buttonText == 'tan' || buttonText == 'e' || buttonText == 'EE' ||
+          buttonText == 'Rand' || buttonText == 'sinh' || buttonText == 'cosh' || buttonText == 'tanh' || buttonText == 'π' || buttonText == 'Deg' ||
+          buttonText == '+/-' || buttonText == '%'
+      ) {
+        // TODO: Implement scientific functions
+        print('Pressed: $buttonText');
+      }
+      else {
+        if (_currentInput == '0') {
+          _currentInput = buttonText;
         } else {
-          _expression = _output + buttonText;
+          _currentInput += buttonText;
         }
-
-        _num1 = double.parse(_output);
-        _operand = buttonText;
-        _isNewNumber = true;
-        _currentNumber = "";
-        _selectedOperator = buttonText;
-        _cursorPosition = _expression.length;
-      } else {
-        _expression = _expression.substring(0, _cursorPosition) +
-            buttonText +
-            _expression.substring(_cursorPosition);
-        _cursorPosition++;
+        _output = _currentInput;
       }
     });
-    _updateRealTimeOutput();
   }
 
-  Widget _buildButton(String buttonValue, Color buttonColor, Color textColor,
-      {Widget? child}) {
-    Color currentButtonColor = buttonColor;
-    Color currentTextColor = textColor;
-
-    if (buttonValue == _selectedOperator) {
-      currentButtonColor = textColor;
-      currentTextColor = buttonColor;
-    }
-
+  Widget _buildButton(String buttonText, {Color? color, Color? textColor, int flex = 1}) {
     return Expanded(
-      child: Container(
-        margin: const EdgeInsets.all(7.5),
+      flex: flex,
+      child: Padding(
+        padding: const EdgeInsets.all(4.0),
         child: ElevatedButton(
-          onPressed: () => _buttonPressed(buttonValue),
+          onPressed: () => _buttonPressed(buttonText),
           style: ElevatedButton.styleFrom(
-            backgroundColor: currentButtonColor,
-            foregroundColor: currentTextColor,
-            shape: const CircleBorder(),
-            padding: const EdgeInsets.all(19),
-            minimumSize: const Size(78, 78),
+            backgroundColor: color ?? Colors.grey[850],
+            foregroundColor: textColor ?? Colors.white,
+            shape: const StadiumBorder(),
+            padding: const EdgeInsets.symmetric(vertical: 20),
           ),
-          child: child ??
-              Text(
-                buttonValue,
-                style: const TextStyle(
-                  fontSize: 34.0,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+          child: Text(
+            buttonText,
+            style: const TextStyle(fontSize: 20),
+          ),
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildIconButton({required IconData icon, VoidCallback? onPressed, Color? color, int flex = 1}) {
+    return Expanded(
+      flex: flex,
+      child: Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: ElevatedButton(
+          onPressed: onPressed,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: color ?? Colors.grey[850],
+            foregroundColor: Colors.white,
+            shape: const StadiumBorder(),
+            padding: const EdgeInsets.symmetric(vertical: 20),
+          ),
+          child: Icon(icon, size: 20),
         ),
       ),
     );
   }
 
-  Widget _buildZeroButton(String buttonValue, Color buttonColor, Color textColor,
-      {Widget? child}) {
-    return Expanded(
-      child: Container(
-        margin: const EdgeInsets.all(7.5),
-        child: ElevatedButton(
-          onPressed: () => _buttonPressed(buttonValue),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: buttonColor,
-            foregroundColor: textColor,
-            shape: const CircleBorder(),
-            padding: const EdgeInsets.all(19),
-            minimumSize: const Size(78, 78),
-          ),
-          child: child ??
-              Text(
-                buttonValue,
-                style: const TextStyle(
-                  fontSize: 34.0,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-        ),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: <Widget>[
-          Container(
-            padding: const EdgeInsets.only(top: 40.0, left: 15.0),
-            alignment: Alignment.topLeft,
-            child: IconButton(
-              icon: const Icon(Icons.dehaze_rounded, color: Colors.orange),
-              onPressed: () {},
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Container(
-              padding: const EdgeInsets.all(19.0),
-              alignment: Alignment.bottomRight,
+      appBar: AppBar(
+        leading: Builder(
+          builder: (BuildContext context) {
+            return IconButton(
+              icon: const Icon(Icons.menu),
+              onPressed: () {
+                Scaffold.of(context).openDrawer();
+              },
+              tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+            );
+          },
+        ),
+        title: const Text(''),
+        backgroundColor: Colors.black,
+        elevation: 0,
+      ),
+      drawer: const Drawer(),
+      backgroundColor: Colors.black,
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        child: Column(
+          children: <Widget>[
+            Expanded(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
                 mainAxisAlignment: MainAxisAlignment.end,
-                children: <Widget>[
-                  LayoutBuilder(
-                    builder: (BuildContext context, BoxConstraints constraints) {
-                      double fontSize = 88.0;
-                      if (_expression.length > 10 && _expression.length <= 15) {
-                        fontSize = 68.0;
-                      } else if (_expression.length > 15 &&
-                          _expression.length <= 20) {
-                        fontSize = 49.0;
-                      } else if (_expression.length > 20) {
-                        fontSize = 39.0;
-                      }
-
-                      return GestureDetector(
-                        onTapUp: (details) {
-                          final textSpan =
-                              TextSpan(text: _expression, style: TextStyle(fontSize: fontSize));
-                          final textPainter = TextPainter(
-                              text: textSpan, textDirection: TextDirection.ltr);
-                          textPainter.layout();
-                          final position =
-                              textPainter.getPositionForOffset(details.localPosition);
-                          setState(() {
-                            _cursorPosition = position.offset;
-                          });
-                        },
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          reverse: true,
-                          child: RichText(
-                            text: TextSpan(
-                              style: TextStyle(
-                                fontSize: fontSize,
-                                fontWeight: FontWeight.w300,
-                                color: Colors.white,
-                              ),
-                              children: [
-                                TextSpan(
-                                  text: _expression.substring(0, _cursorPosition),
-                                ),
-                                const TextSpan(
-                                  text: "|",
-                                  style: TextStyle(color: Colors.orange),
-                                ),
-                                TextSpan(
-                                  text: _expression.substring(_cursorPosition),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  const Text(
+                    'Rad',
+                    style: TextStyle(color: Colors.grey, fontSize: 20),
                   ),
-                  Text(
-                    _realTimeOutput,
-                    style: const TextStyle(
-                      fontSize: 34.0,
-                      fontWeight: FontWeight.w300,
-                      color: Colors.grey,
+                  const SizedBox(height: 10),
+                  Container(
+                    alignment: Alignment.bottomRight,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    child: Text(
+                      _output,
+                      style: const TextStyle(fontSize: 64, fontWeight: FontWeight.w300, color: Colors.white),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 15.0),
-            child: Column(
-              children: [
-                Row(
-                  children: <Widget>[
-                    _buildButton("AC", const Color(0xFFA5A5A5), Colors.black),
-                    _buildButton("+/-", const Color(0xFFA5A5A5), Colors.black),
-                    _buildButton("%", const Color(0xFFA5A5A5), Colors.black),
-                    _buildButton("÷", const Color(0xFFFF9500), Colors.white),
-                  ],
-                ),
-                Row(
-                  children: <Widget>[
-                    _buildButton("7", const Color(0xFF333333), Colors.white),
-                    _buildButton("8", const Color(0xFF333333), Colors.white),
-                    _buildButton("9", const Color(0xFF333333), Colors.white),
-                    _buildButton("×", const Color(0xFFFF9500), Colors.white),
-                  ],
-                ),
-                Row(
-                  children: <Widget>[
-                    _buildButton("4", const Color(0xFF333333), Colors.white),
-                    _buildButton("5", const Color(0xFF333333), Colors.white),
-                    _buildButton("6", const Color(0xFF333333), Colors.white),
-                    _buildButton("-", const Color(0xFFFF9500), Colors.white),
-                  ],
-                ),
-                Row(
-                  children: <Widget>[
-                    _buildButton("1", const Color(0xFF333333), Colors.white),
-                    _buildButton("2", const Color(0xFF333333), Colors.white),
-                    _buildButton("3", const Color(0xFF333333), Colors.white),
-                    _buildButton("+", const Color(0xFFFF9500), Colors.white),
-                  ],
-                ),
-                Row(
-                  children: <Widget>[
-                    _buildButton("", const Color(0xFF333333), Colors.white,
-                        child: const Icon(Icons.keyboard, color: Colors.white)),
-                    _buildButton("0", const Color(0xFF333333), Colors.white),
-                    _buildButton(".", const Color(0xFF333333), Colors.white),
-                    _buildButton("=", const Color(0xFFFF9500), Colors.white),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
+            const Divider(color: Colors.grey),
+            _buildScientificCalculatorPad(),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildScientificCalculatorPad() {
+    return Column(
+      children: [
+        Row(
+          children: <Widget>[
+            _buildButton('(', color: Colors.grey[800]),
+            _buildButton(')', color: Colors.grey[800]),
+            _buildButton('mc', color: Colors.grey[800]),
+            _buildButton('m+', color: Colors.grey[800]),
+            _buildButton('m-', color: Colors.grey[800]),
+            _buildButton('mr', color: Colors.grey[800]),
+          ],
+        ),
+        Row(
+          children: <Widget>[
+            _buildButton('2nd', color: Colors.grey[800]),
+            _buildButton('x²', color: Colors.grey[800]),
+            _buildButton('x³', color: Colors.grey[800]),
+            _buildButton('xʸ', color: Colors.grey[800]),
+            _buildButton('eˣ', color: Colors.grey[800]),
+            _buildButton('10ˣ', color: Colors.grey[800]),
+          ],
+        ),
+        Row(
+          children: <Widget>[
+            _buildButton('¹/ₓ', color: Colors.grey[800]),
+            _buildButton('²√x', color: Colors.grey[800]),
+            _buildButton('³√x', color: Colors.grey[800]),
+            _buildButton('ʸ√x', color: Colors.grey[800]),
+            _buildButton('ln', color: Colors.grey[800]),
+            _buildButton('log₁₀', color: Colors.grey[800]),
+          ],
+        ),
+        Row(
+          children: <Widget>[
+            _buildButton('x!', color: Colors.grey[800]),
+            _buildButton('sin', color: Colors.grey[800]),
+            _buildButton('cos', color: Colors.grey[800]),
+            _buildButton('tan', color: Colors.grey[800]),
+            _buildButton('e', color: Colors.grey[800]),
+            _buildButton('EE', color: Colors.grey[800]),
+          ],
+        ),
+        Row(
+          children: <Widget>[
+            _buildButton('Rand', color: Colors.grey[800]),
+            _buildButton('sinh', color: Colors.grey[800]),
+            _buildButton('cosh', color: Colors.grey[800]),
+            _buildButton('tanh', color: Colors.grey[800]),
+            _buildButton('π', color: Colors.grey[800]),
+            _buildButton('Deg', color: Colors.grey[800]),
+          ],
+        ),
+        Row(
+          children: <Widget>[
+            _buildButton('AC', color: Colors.grey, textColor: Colors.black),
+            _buildButton('+/-', color: Colors.grey, textColor: Colors.black),
+            _buildButton('%', color: Colors.grey, textColor: Colors.black),
+            _buildButton('÷', color: Colors.orange),
+          ],
+        ),
+        Row(
+          children: <Widget>[
+            _buildButton('7'),
+            _buildButton('8'),
+            _buildButton('9'),
+            _buildButton('x', color: Colors.orange),
+          ],
+        ),
+        Row(
+          children: <Widget>[
+            _buildButton('4'),
+            _buildButton('5'),
+            _buildButton('6'),
+            _buildButton('-', color: Colors.orange),
+          ],
+        ),
+        Row(
+          children: <Widget>[
+            _buildButton('1'),
+            _buildButton('2'),
+            _buildButton('3'),
+            _buildButton('+', color: Colors.orange),
+          ],
+        ),
+        Row(
+          children: <Widget>[
+            _buildIconButton(icon: Icons.apps, onPressed: () {
+                print('Icon button pressed');
+            }),
+            _buildButton('0'),
+            _buildButton('.'),
+            _buildButton('=', color: Colors.orange),
+          ],
+        ),
+        const SizedBox(height: 10),
+      ],
     );
   }
 }
