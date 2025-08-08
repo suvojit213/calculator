@@ -30,6 +30,18 @@ class CalculatorHomePage extends StatefulWidget {
 }
 
 class _CalculatorHomePageState extends State<CalculatorHomePage> {
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(() {
+      if (!_focusNode.hasFocus) {
+        setState(() {
+          _isEditing = false;
+        });
+      }
+    });
+  }
+
   String _output = "0"; // This will hold the result of the calculation
   String _expression = ""; // This will hold the full expression
   String _currentNumber = "";
@@ -39,6 +51,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
   String _selectedOperator = ""; // New state variable for selected operator
   bool _isEditing = false;
   final TextEditingController _expressionController = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
 
   void _buttonPressed(String buttonText) {
     setState(() {
@@ -273,6 +286,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                     if (_isEditing) {
                       return TextField(
                         controller: _expressionController,
+                        focusNode: _focusNode,
                         autofocus: true,
                         style: const TextStyle(
                           fontSize: 48.0,
@@ -302,6 +316,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                             setState(() {
                               _isEditing = true;
                               _expressionController.text = _expression;
+                              _focusNode.requestFocus();
                             });
                           },
                           child: Text(
@@ -330,6 +345,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                             setState(() {
                               _isEditing = true;
                               _expressionController.text = _expression;
+                              _focusNode.requestFocus();
                             });
                           },
                           child: SingleChildScrollView(
