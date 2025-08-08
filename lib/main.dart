@@ -208,7 +208,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
           child: child ?? Text(
             buttonValue,
             style: const TextStyle(
-              fontSize: 32.0, // Slightly smaller font for buttons
+              fontSize: 32.0, // Consistent font size for all buttons
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -315,21 +315,9 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
               children: [
                 Row(
                   children: <Widget>[
-                    _buildButton("AC", const Color(0xFFA5A5A5), Colors.black, child: const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text("A", style: TextStyle(fontSize: 35.0, fontWeight: FontWeight.w500)),
-                        Text("C", style: TextStyle(fontSize: 35.0, fontWeight: FontWeight.w500)),
-                      ],
-                    )),
-                    _buildButton("+/-", const Color(0xFFA5A5A5), Colors.black, child: const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text("+", style: TextStyle(fontSize: 35.0, fontWeight: FontWeight.w500)),
-                        Text("-", style: TextStyle(fontSize: 35.0, fontWeight: FontWeight.w500)),
-                      ],
-                    )),
-                    _buildButton("%", const Color(0xFFA5A5A5), Colors.black),
+                    _buildButton("AC", const Color(0xFFD4D4D2), Colors.black), // Lighter grey
+                    _buildButton("+/-", const Color(0xFFD4D4D2), Colors.black), // Lighter grey
+                    _buildButton("%", const Color(0xFFD4D4D2), Colors.black),
                     _buildButton("÷", const Color(0xFFF1A33B), Colors.white),
                   ],
                 ),
