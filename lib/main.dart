@@ -149,7 +149,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
         if (_isNewNumber && _expression.isNotEmpty && (_expression.endsWith("+") || _expression.endsWith("-") || _expression.endsWith("×") || _expression.endsWith("÷"))) {
           // Replace last operator if a new one is pressed immediately after another operator
           _expression = _expression.substring(0, _expression.length - 1) + buttonText;
-        } else {
+        } else if (_currentNumber.isNotEmpty) {
           _expression += buttonText; // Append operator to expression
         }
         _num1 = double.parse(_currentNumber.isEmpty ? _output : _currentNumber); // Use _output if _currentNumber is empty (e.g., after a calculation)
@@ -163,7 +163,13 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
     } else {
       if (_isNewNumber) {
         _currentNumber = buttonText;
-        _expression = buttonText; // Start new expression
+        if (_expression.isEmpty || _expression == _output) { // If starting a new calculation or after '=' pressed
+          _expression = buttonText; // Start new expression
+        } else if (_expression.endsWith("+") || _expression.endsWith("-") || _expression.endsWith("×") || _expression.endsWith("÷")) {
+          _expression += buttonText; // Append to expression after an operator
+        } else {
+          _expression = buttonText; // Overwrite if not an operator or empty
+        }
         _isNewNumber = false;
       } else {
         _currentNumber += buttonText;
@@ -255,11 +261,8 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300), // Animation duration
                 transitionBuilder: (Widget child, Animation<double> animation) {
-                  return SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(0, 1), // Start from bottom
-                      end: Offset.zero,
-                    ).animate(animation),
+                  return FadeTransition(
+                    opacity: animation,
                     child: child,
                   );
                 },
