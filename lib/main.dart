@@ -61,7 +61,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
     super.dispose();
   }
 
-  """  void _updateRealTimeOutput() {
+  void _updateRealTimeOutput() {
     try {
       String finalExpression = _expression.replaceAll("×", "*").replaceAll("÷", "/").replaceAll("%", "/100");
       if (finalExpression.isNotEmpty &&
@@ -114,7 +114,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
     } catch (e) {
       _realTimeOutput = "Error";
     }
-  }""
+  }
 
   void _buttonPressed(String buttonText) {
     setState(() {
@@ -457,7 +457,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                     _buildButton("7", const Color(0xFF333333), Colors.white),
                     _buildButton("8", const Color(0xFF333333), Colors.white),
                     _buildButton("9", const Color(0xFF333333), Colors.white),
-                    _buildButton("×", const Color(0xFFFF9500), Colors.white),
+                    _build_button("×", const Color(0xFFFF9500), Colors.white),
                   ],
                 ),
                 Row(
