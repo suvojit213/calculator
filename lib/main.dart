@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -57,8 +59,6 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
       _showCursor = false;
     });
   }
-  bool _showCursor = false;
-  Timer? _cursorTimer;
 
   void _buttonPressed(String buttonText) {
     setState(() {
@@ -70,12 +70,14 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
         _operand = "";
         _isNewNumber = true;
         _isEditing = false;
+        _stopCursorTimer();
       } else if (buttonText == "C") {
         _output = "0";
         _expression = "";
         _currentNumber = "";
         _isNewNumber = true;
         _isEditing = false;
+        _stopCursorTimer();
       } else if (buttonText == "⌫") {
         if (_isEditing) {
           if (_cursorPosition > 0) {
@@ -170,6 +172,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
             _operand = "";
             _isNewNumber = true;
             _isEditing = false;
+            _stopCursorTimer();
           }
         } catch (e) {
           _output = "Error";
@@ -179,6 +182,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
           _operand = "";
           _isNewNumber = true;
           _isEditing = false;
+          _stopCursorTimer();
         }
       } else if (buttonText == "+" ||
           buttonText == "-" ||
@@ -391,6 +395,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                                         setState(() {
                                           _isEditing = true;
                                           _cursorPosition = _expression.length;
+                                          _startCursorTimer();
                                         });
                                       },
                                   ),
