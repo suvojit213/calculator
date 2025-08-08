@@ -369,10 +369,18 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                   LayoutBuilder(
                     builder: (BuildContext context, BoxConstraints constraints) {
                       double fontSize = 88.0;
-                      if (_expression.length > 15) {
-                        fontSize = 34.0;
-                      } else if (_expression.length > 7) {
-                        fontSize = 88.0 - (_expression.length - 7) * 6;
+                      final textStyle = TextStyle(fontSize: fontSize, fontWeight: FontWeight.w300);
+                      final textPainter = TextPainter(
+                        text: TextSpan(text: _expression, style: textStyle),
+                        textDirection: TextDirection.ltr,
+                      );
+                      textPainter.layout();
+
+                      if (textPainter.width > constraints.maxWidth) {
+                        fontSize = (constraints.maxWidth / textPainter.width) * fontSize;
+                        if (fontSize < 34.0) {
+                          fontSize = 34.0;
+                        }
                       }
 
                       return GestureDetector(
