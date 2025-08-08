@@ -151,6 +151,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
       } else if (buttonText == "%") {
         if (_currentNumber.isNotEmpty) {
           _expression += buttonText;
+          _cursorPosition = _expression.length;
           _updateRealTimeOutput();
         }
       } else if (buttonText == ".") {
