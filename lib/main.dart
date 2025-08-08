@@ -387,6 +387,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                         child: SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           reverse: true,
+                          padding: const EdgeInsets.only(left: 20.0),
                           child: RichText(
                             text: TextSpan(
                               style: TextStyle(
