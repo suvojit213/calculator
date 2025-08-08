@@ -310,7 +310,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(bottom: 18.0), // Reduced bottom padding
+            padding: const EdgeInsets.only(bottom: 10.0), // Reduced bottom padding
             child: Column(
               children: [
                 Row(
