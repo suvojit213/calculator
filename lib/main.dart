@@ -457,7 +457,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                     _buildButton("7", const Color(0xFF333333), Colors.white),
                     _buildButton("8", const Color(0xFF333333), Colors.white),
                     _buildButton("9", const Color(0xFF333333), Colors.white),
-                    _build_button("×", const Color(0xFFFF9500), Colors.white),
+                    _buildButton("×", const Color(0xFFFF9500), Colors.white),
                   ],
                 ),
                 Row(
