@@ -221,63 +221,66 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
               ),
             ),
           ),
-          Column(
-            children: [
-              Row(
-                children: <Widget>[
-                  _buildButton("AC", const Color(0xFFA5A5A5), Colors.black, child: const Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("A", style: TextStyle(fontSize: 35.0, fontWeight: FontWeight.w500)),
-                      Text("C", style: TextStyle(fontSize: 35.0, fontWeight: FontWeight.w500)),
-                    ],
-                  )),
-                  _buildButton("+/-", const Color(0xFFA5A5A5), Colors.black, child: const Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("+", style: TextStyle(fontSize: 35.0, fontWeight: FontWeight.w500)),
-                      Text("-", style: TextStyle(fontSize: 35.0, fontWeight: FontWeight.w500)),
-                    ],
-                  )),
-                  _buildButton("%", const Color(0xFFA5A5A5), Colors.black),
-                  _buildButton("÷", const Color(0xFFF1A33B), Colors.white),
-                ],
-              ),
-              Row(
-                children: <Widget>[
-                  _buildButton("7", const Color(0xFF333333), Colors.white),
-                  _buildButton("8", const Color(0xFF333333), Colors.white),
-                  _buildButton("9", const Color(0xFF333333), Colors.white),
-                  _buildButton("×", const Color(0xFFF1A33B), Colors.white),
-                ],
-              ),
-              Row(
-                children: <Widget>[
-                  _buildButton("4", const Color(0xFF333333), Colors.white),
-                  _buildButton("5", const Color(0xFF333333), Colors.white),
-                  _buildButton("6", const Color(0xFF333333), Colors.white),
-                  _buildButton("-", const Color(0xFFF1A33B), Colors.white),
-                ],
-              ),
-              Row(
-                children: <Widget>[
-                  _buildButton("1", const Color(0xFF333333), Colors.white),
-                  _buildButton("2", const Color(0xFF333333), Colors.white),
-                  _buildButton("3", const Color(0xFF333333), Colors.white),
-                  _buildButton("+", const Color(0xFFF1A33B), Colors.white),
-                ],
-              ),
-              Row(
-                children: <Widget>[
-                  _buildZeroButton("0", const Color(0xFF333333), Colors.white),
-                  _buildButton(".", const Color(0xFF333333), Colors.white),
-                  _buildButton("=", const Color(0xFFF1A33B), Colors.white),
-                ],
-              ),
-            ],
+          Padding(
+            padding: const EdgeInsets.only(bottom: 20.0), // Add bottom padding
+            child: Column(
+              children: [
+                Row(
+                  children: <Widget>[
+                    _buildButton("AC", const Color(0xFFA5A5A5), Colors.black, child: const Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("A", style: TextStyle(fontSize: 35.0, fontWeight: FontWeight.w500)),
+                        Text("C", style: TextStyle(fontSize: 35.0, fontWeight: FontWeight.w500)),
+                      ],
+                    )),
+                    _buildButton("+/-", const Color(0xFFA5A5A5), Colors.black, child: const Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("+", style: TextStyle(fontSize: 35.0, fontWeight: FontWeight.w500)),
+                        Text("-", style: TextStyle(fontSize: 35.0, fontWeight: FontWeight.w500)),
+                      ],
+                    )),
+                    _buildButton("%", const Color(0xFFA5A5A5), Colors.black),
+                    _buildButton("÷", const Color(0xFFF1A33B), Colors.white),
+                  ],
+                ),
+                Row(
+                  children: <Widget>[
+                    _buildButton("7", const Color(0xFF333333), Colors.white),
+                    _buildButton("8", const Color(0xFF333333), Colors.white),
+                    _buildButton("9", const Color(0xFF333333), Colors.white),
+                    _buildButton("×", const Color(0xFFF1A33B), Colors.white),
+                  ],
+                ),
+                Row(
+                  children: <Widget>[
+                    _buildButton("4", const Color(0xFF333333), Colors.white),
+                    _buildButton("5", const Color(0xFF333333), Colors.white),
+                    _buildButton("6", const Color(0xFF333333), Colors.white),
+                    _buildButton("-", const Color(0xFFF1A33B), Colors.white),
+                  ],
+                ),
+                Row(
+                  children: <Widget>[
+                    _buildButton("1", const Color(0xFF333333), Colors.white),
+                    _buildButton("2", const Color(0xFF333333), Colors.white),
+                    _buildButton("3", const Color(0xFF333333), Colors.white),
+                    _buildButton("+", const Color(0xFFF1A33B), Colors.white),
+                  ],
+                ),
+                Row(
+                  children: <Widget>[
+                    _buildZeroButton("0", const Color(0xFF333333), Colors.white),
+                    _buildButton(".", const Color(0xFF333333), Colors.white),
+                    _buildButton("=", const Color(0xFFF1A33B), Colors.white),
+                  ],
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
-    );
-  }
-}
+        ], // Close children list
+      ), // Close Column
+    ); // Close Scaffold
+  } // Close build method
+} // Close _CalculatorHomePageState class
