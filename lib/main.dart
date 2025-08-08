@@ -42,6 +42,24 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
   String _selectedOperator = "";
   int _cursorPosition = 0;
   String _realTimeOutput = "";
+  bool _isCursorVisible = true;
+  Timer? _cursorTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _cursorTimer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
+      setState(() {
+        _isCursorVisible = !_isCursorVisible;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _cursorTimer?.cancel();
+    super.dispose();
+  }
 
   void _updateRealTimeOutput() {
     try {
@@ -366,10 +384,11 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                                 TextSpan(
                                   text: _expression.substring(0, _cursorPosition),
                                 ),
-                                const TextSpan(
-                                  text: "|",
-                                  style: TextStyle(color: Colors.orange),
-                                ),
+                                if (_isCursorVisible)
+                                  const TextSpan(
+                                    text: "|",
+                                    style: TextStyle(color: Colors.orange),
+                                  ),
                                 TextSpan(
                                   text: _expression.substring(_cursorPosition),
                                 ),
