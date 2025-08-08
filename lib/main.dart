@@ -274,7 +274,6 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
   Widget _buildZeroButton(String buttonValue, Color buttonColor, Color textColor,
       {Widget? child}) {
     return Expanded(
-      flex: 2,
       child: Container(
         margin: const EdgeInsets.all(7.5),
         child: ElevatedButton(
@@ -282,22 +281,16 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
           style: ElevatedButton.styleFrom(
             backgroundColor: buttonColor,
             foregroundColor: textColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(49.0),
-            ),
-            padding:
-                const EdgeInsets.symmetric(horizontal: 29, vertical: 19),
-            minimumSize: const Size(168, 78),
+            shape: const CircleBorder(),
+            padding: const EdgeInsets.all(19),
+            minimumSize: const Size(78, 78),
           ),
           child: child ??
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  buttonValue,
-                  style: const TextStyle(
-                    fontSize: 34.0,
-                    fontWeight: FontWeight.w500,
-                  ),
+              Text(
+                buttonValue,
+                style: const TextStyle(
+                  fontSize: 34.0,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
         ),
@@ -310,6 +303,14 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
     return Scaffold(
       body: Column(
         children: <Widget>[
+          Container(
+            padding: const EdgeInsets.only(top: 40.0, left: 15.0),
+            alignment: Alignment.topLeft,
+            child: IconButton(
+              icon: const Icon(Icons.dehaze_rounded, color: Colors.orange),
+              onPressed: () {},
+            ),
+          ),
           Expanded(
             flex: 2,
             child: Container(
@@ -391,7 +392,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                 Row(
                   children: <Widget>[
                     _buildButton("AC", const Color(0xFFA5A5A5), Colors.black),
-                    _buildButton("⌫", const Color(0xFFA5A5A5), Colors.black),
+                    _buildButton("+/-", const Color(0xFFA5A5A5), Colors.black),
                     _buildButton("%", const Color(0xFFA5A5A5), Colors.black),
                     _buildButton("÷", const Color(0xFFFF9500), Colors.white),
                   ],
@@ -422,7 +423,9 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                 ),
                 Row(
                   children: <Widget>[
-                    _buildZeroButton("0", const Color(0xFF333333), Colors.white),
+                    _buildButton("", const Color(0xFF333333), Colors.white,
+                        child: const Icon(Icons.keyboard, color: Colors.white)),
+                    _buildButton("0", const Color(0xFF333333), Colors.white),
                     _buildButton(".", const Color(0xFF333333), Colors.white),
                     _buildButton("=", const Color(0xFFFF9500), Colors.white),
                   ],
