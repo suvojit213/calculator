@@ -356,15 +356,6 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                         fontSize = 88.0 * constraints.maxWidth / tp.width;
                       }
 
-                      if (_expression.length > 10 && _expression.length <= 15) {
-                        fontSize = 68.0;
-                      } else if (_expression.length > 15 &&
-                          _expression.length <= 20) {
-                        fontSize = 49.0;
-                      } else if (_expression.length > 20) {
-                        fontSize = 39.0;
-                      }
-
                       return GestureDetector(
                         onTapUp: (details) {
                           final textSpan =
