@@ -195,20 +195,20 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
 
     return Expanded(
       child: Container(
-        margin: const EdgeInsets.all(6.0), // Reduced margin
+        margin: const EdgeInsets.all(7.5), // Slightly reduced margin
         child: ElevatedButton(
           onPressed: () => _buttonPressed(buttonValue),
           style: ElevatedButton.styleFrom(
             backgroundColor: currentButtonColor,
             foregroundColor: currentTextColor,
             shape: const CircleBorder(),
-            padding: const EdgeInsets.all(18), // Reduced padding
-            minimumSize: const Size(75, 75), // Slightly smaller buttons
+            padding: const EdgeInsets.all(19), // Slightly reduced padding
+            minimumSize: const Size(78, 78), // Slightly smaller buttons
           ),
           child: child ?? Text(
             buttonValue,
             style: const TextStyle(
-              fontSize: 32.0, // Consistent font size for all buttons
+              fontSize: 34.0, // Slightly smaller font for buttons
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -221,24 +221,24 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
     return Expanded(
       flex: 2,
       child: Container(
-        margin: const EdgeInsets.all(6.0), // Reduced margin
+        margin: const EdgeInsets.all(7.5), // Slightly reduced margin
         child: ElevatedButton(
           onPressed: () => _buttonPressed(buttonValue),
           style: ElevatedButton.styleFrom(
             backgroundColor: buttonColor,
             foregroundColor: textColor,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(45.0), // Adjusted for smaller size
+              borderRadius: BorderRadius.circular(49.0), // Adjusted for smaller size
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18), // Reduced padding
-            minimumSize: const Size(160, 75), // Adjusted for smaller size
+            padding: const EdgeInsets.symmetric(horizontal: 29, vertical: 19), // Slightly reduced padding
+            minimumSize: const Size(168, 78), // Adjusted for smaller size
           ),
           child: child ?? Align(
             alignment: Alignment.centerLeft,
             child: Text(
               buttonValue,
               style: const TextStyle(
-                fontSize: 32.0, // Slightly smaller font for buttons
+                fontSize: 34.0, // Slightly smaller font for buttons
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -256,7 +256,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
           Expanded(
             flex: 2,
             child: Container(
-              padding: const EdgeInsets.all(18.0), // Reduced padding
+              padding: const EdgeInsets.all(19.0), // Slightly reduced padding
               alignment: Alignment.bottomRight,
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300), // Animation duration
@@ -274,20 +274,20 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                         _output,
                         key: ValueKey<String>(_output), // Key for AnimatedSwitcher
                         style: const TextStyle(
-                          fontSize: 45.0, // Fixed smaller size for the result
+                          fontSize: 49.0, // Fixed smaller size for the result
                           fontWeight: FontWeight.w300,
                           color: Colors.white,
                         ),
                       );
                     } else {
                       // Display _expression with dynamic sizing and scrolling
-                      double fontSize = 80.0; // Adjusted initial font size
+                      double fontSize = 88.0; // Adjusted initial font size
                       if (_expression.length > 10 && _expression.length <= 15) {
-                        fontSize = 65.0;
+                        fontSize = 68.0;
                       } else if (_expression.length > 15 && _expression.length <= 20) {
-                        fontSize = 48.0;
+                        fontSize = 49.0;
                       } else if (_expression.length > 20) {
-                        fontSize = 38.0;
+                        fontSize = 39.0;
                       }
 
                       return SingleChildScrollView(
@@ -310,14 +310,26 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(bottom: 10.0), // Reduced bottom padding
+            padding: const EdgeInsets.only(bottom: 15.0), // Adjusted bottom padding for navigation bar
             child: Column(
               children: [
                 Row(
                   children: <Widget>[
-                    _buildButton("AC", const Color(0xFFD4D4D2), Colors.black), // Lighter grey
-                    _buildButton("+/-", const Color(0xFFD4D4D2), Colors.black), // Lighter grey
-                    _buildButton("%", const Color(0xFFD4D4D2), Colors.black),
+                    _buildButton("AC", const Color(0xFFA5A5A5), Colors.black, child: const Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("A", style: TextStyle(fontSize: 35.0, fontWeight: FontWeight.w500)),
+                        Text("C", style: TextStyle(fontSize: 35.0, fontWeight: FontWeight.w500)),
+                      ],
+                    )),
+                    _buildButton("+/-", const Color(0xFFA5A5A5), Colors.black, child: const Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("+", style: TextStyle(fontSize: 35.0, fontWeight: FontWeight.w500)),
+                        Text("-", style: TextStyle(fontSize: 35.0, fontWeight: FontWeight.w500)),
+                      ],
+                    )),
+                    _buildButton("%", const Color(0xFFA5A5A5), Colors.black),
                     _buildButton("÷", const Color(0xFFF1A33B), Colors.white),
                   ],
                 ),
@@ -355,8 +367,3 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
               ],
             ),
           ),
-        ], // Close children list
-      ), // Close Column
-    ); // Close Scaffold
-  } // Close build method
-} // Close _CalculatorHomePageState class
