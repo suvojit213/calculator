@@ -486,7 +486,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                         String textToDisplay = _realTimeOutput;
                         final style = const TextStyle(
                           fontSize: 34.0,
-                          fontWeight: FontWeight.w300,
+                          fontWeight: FontWeight.w500,
                           color: Colors.grey,
                         );
 
