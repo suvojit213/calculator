@@ -264,23 +264,28 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
             if (_isFinalResult) {
               _expression = "0.";
               _currentNumber = "0.";
+              _output = "0.";
               _isFinalResult = false;
             } else if (!_currentNumber.contains(".")) {
               if (_isNewNumber) {
                 _currentNumber = "0.";
-                _expression = "0.";
+                _expression += "0.";
               } else {
                 _currentNumber += ".";
                 _expression += ".";
               }
+              _output = _currentNumber;
             }
-            _output = _currentNumber;
             _isNewNumber = false;
             _cursorPosition = _expression.length;
           } else if (buttonText == "+" ||
               buttonText == "-" ||
               buttonText == "×" ||
               buttonText == "÷") {
+            if (_isFinalResult) {
+              _expression = _output;
+              _isFinalResult = false;
+            }
             if (_expression.isNotEmpty) {
               if (_expression.endsWith("+") ||
                   _expression.endsWith("-") ||
@@ -291,37 +296,37 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
               } else {
                 _expression += buttonText;
               }
-            } else if (_currentNumber.isNotEmpty) {
-              _expression = _currentNumber + buttonText;
             } else {
               _expression = _output + buttonText;
             }
-            _num1 = double.tryParse(_output) ?? 0.0;
-            _operand = buttonText;
             _isNewNumber = true;
             _currentNumber = "";
             _selectedOperator = buttonText;
             _cursorPosition = _expression.length;
-            _isFinalResult = false;
           } else {
-            if (_isFinalResult || _isNewNumber) {
-              if (_isFinalResult) _expression = "";
+            if (_isFinalResult) {
+              _output = buttonText;
+              _expression = buttonText;
               _currentNumber = buttonText;
-              _isNewNumber = false;
               _isFinalResult = false;
+              _isNewNumber = false;
             } else {
-              _currentNumber += buttonText;
+              if (_isNewNumber) {
+                _currentNumber = buttonText;
+                _isNewNumber = false;
+              } else {
+                _currentNumber += buttonText;
+              }
+              if (_operand.isNotEmpty && _isNewNumber) {
+                _expression += buttonText;
+              } else {
+                _expression = _expression.substring(0, _cursorPosition) +
+                    buttonText +
+                    _expression.substring(_cursorPosition);
+              }
+              _output = _currentNumber;
             }
-
-            if (_operand.isNotEmpty && _isNewNumber) {
-              _expression += buttonText;
-            } else if (!_isFinalResult) {
-              _expression = _expression.substring(0, _cursorPosition) +
-                  buttonText +
-                  _expression.substring(_cursorPosition);
-            }
-            _cursorPosition++;
-            _output = _currentNumber;
+            _cursorPosition = _expression.length;
             _selectedOperator = "";
           }
         });
