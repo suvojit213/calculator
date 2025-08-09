@@ -152,7 +152,6 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
   bool _isCursorVisible = true;
   Timer? _cursorTimer;
   double _fontSize = 88.0;
-  bool _isFinalResult = false;
   bool _isProcessing = false;
 
   @override
@@ -172,7 +171,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
   }
 
   Future<void> _updateRealTimeOutput() async {
-    if (_expression.isEmpty || _isFinalResult) {
+    if (_expression.isEmpty) {
       setState(() {
         _realTimeOutput = "";
       });
@@ -192,10 +191,9 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
     try {
       _isProcessing = true;
       if (buttonText == "=") {
-        if (_expression.isNotEmpty && !_isFinalResult) {
+        if (_expression.isNotEmpty) {
           final expressionToCalculate = _expression;
           setState(() {
-            _isFinalResult = true;
             _realTimeOutput = "";
           });
 
@@ -225,23 +223,20 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
             _operand = "";
             _isNewNumber = true;
             _cursorPosition = 0;
-            _isFinalResult = false;
           } else if (buttonText == "C") {
             _output = "0";
             _expression = "";
             _currentNumber = "";
             _isNewNumber = true;
             _cursorPosition = 0;
-            _isFinalResult = false;
           } else if (buttonText == "⌫") {
-            if (_expression.isNotEmpty && !_isFinalResult) {
+            if (_expression.isNotEmpty) {
               if (_cursorPosition > 0) {
                 _expression = _expression.substring(0, _cursorPosition - 1) +
                     _expression.substring(_cursorPosition);
                 _cursorPosition--;
               }
             }
-            _isFinalResult = false;
           } else if (buttonText == "+/-") {
             if (_currentNumber.isNotEmpty && _currentNumber != "0") {
               if (_currentNumber.startsWith("-")) {
@@ -259,13 +254,8 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
               _expression += buttonText;
               _cursorPosition = _expression.length;
             }
-            _isFinalResult = false;
           } else if (buttonText == ".") {
-            if (_isFinalResult) {
-              _expression = "0.";
-              _currentNumber = "0.";
-              _isFinalResult = false;
-            } else if (!_currentNumber.contains(".")) {
+            if (!_currentNumber.contains(".")) {
               if (_isNewNumber) {
                 _currentNumber = "0.";
                 _expression = "0.";
@@ -302,20 +292,13 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
             _currentNumber = "";
             _selectedOperator = buttonText;
             _cursorPosition = _expression.length;
-            _isFinalResult = false;
           } else {
-            if (_isFinalResult || _isNewNumber) {
-              if (_isFinalResult) _expression = "";
+            if (_isNewNumber) {
+              _expression = buttonText;
               _currentNumber = buttonText;
               _isNewNumber = false;
-              _isFinalResult = false;
             } else {
               _currentNumber += buttonText;
-            }
-
-            if (_operand.isNotEmpty && _isNewNumber) {
-              _expression += buttonText;
-            } else if (!_isFinalResult) {
               _expression = _expression.substring(0, _cursorPosition) +
                   buttonText +
                   _expression.substring(_cursorPosition);
@@ -431,7 +414,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                         targetFontSize =
                             (constraints.maxWidth / textPainter.width) *
                                 targetFontSize;
-                        if (!_isFinalResult && targetFontSize < 34.0) {
+                        if (targetFontSize < 34.0) {
                           targetFontSize = 34.0;
                         }
                       }
@@ -450,7 +433,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                         tween: Tween<double>(begin: _fontSize, end: _fontSize),
                         duration: const Duration(milliseconds: 150),
                         builder: (context, animatedFontSize, child) {
-                          Widget textDisplayWidget = RichText(
+                          final textDisplayWidget = RichText(
                             key: ValueKey(_expression),
                             text: TextSpan(
                               style: TextStyle(
@@ -463,17 +446,16 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                                   text: _expression.substring(
                                       0, _cursorPosition),
                                 ),
-                                if (!_isFinalResult)
-                                  WidgetSpan(
-                                    alignment: PlaceholderAlignment.middle,
-                                    child: Container(
-                                      width: 2.0,
-                                      height: animatedFontSize * 0.8,
-                                      color: _isCursorVisible
-                                          ? Colors.orange
-                                          : Colors.transparent,
-                                    ),
+                                WidgetSpan(
+                                  alignment: PlaceholderAlignment.middle,
+                                  child: Container(
+                                    width: 2.0,
+                                    height: animatedFontSize * 0.8,
+                                    color: _isCursorVisible
+                                        ? Colors.orange
+                                        : Colors.transparent,
                                   ),
+                                ),
                                 TextSpan(
                                   text:
                                       _expression.substring(_cursorPosition),
@@ -482,19 +464,8 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                             ),
                           );
 
-                          if (!_isFinalResult) {
-                            textDisplayWidget = SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              reverse: true,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 20.0),
-                              child: textDisplayWidget,
-                            );
-                          }
-
                           return GestureDetector(
                             onTapUp: (details) {
-                              if (_isFinalResult) return;
                               final textSpan = TextSpan(
                                   text: _expression,
                                   style: TextStyle(fontSize: animatedFontSize));
@@ -510,7 +481,13 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                             },
                             child: AnimatedSwitcher(
                               duration: const Duration(milliseconds: 200),
-                              child: textDisplayWidget,
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                reverse: true,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20.0),
+                                child: textDisplayWidget,
+                              ),
                             ),
                           );
                         },
