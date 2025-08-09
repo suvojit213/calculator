@@ -438,6 +438,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                         duration: const Duration(milliseconds: 150),
                         builder: (context, animatedFontSize, child) {
                           Widget textDisplayWidget = RichText(
+                            key: ValueKey(_expression),
                             text: TextSpan(
                               style: TextStyle(
                                 fontSize: animatedFontSize,
@@ -494,7 +495,10 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                                 _cursorPosition = position.offset;
                               });
                             },
-                            child: textDisplayWidget,
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 200),
+                              child: textDisplayWidget,
+                            ),
                           );
                         },
                       );
