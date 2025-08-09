@@ -172,7 +172,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
   }
 
   Future<void> _updateRealTimeOutput() async {
-    if (_expression.isEmpty) {
+    if (_expression.isEmpty || _isFinalResult) {
       setState(() {
         _realTimeOutput = "";
       });
@@ -188,12 +188,19 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
 
   Future<void> _buttonPressed(String buttonText) async {
     if (_isProcessing) return;
-    _isProcessing = true;
 
     try {
+      _isProcessing = true;
       if (buttonText == "=") {
-        if (_expression.isNotEmpty) {
-          final result = await compute(_calculateFinalResult, _expression);
+        if (_expression.isNotEmpty && !_isFinalResult) {
+          final expressionToCalculate = _expression;
+          setState(() {
+            _isFinalResult = true;
+            _realTimeOutput = "";
+          });
+
+          final result = await compute(_calculateFinalResult, expressionToCalculate);
+
           setState(() {
             if (result.isEmpty) {
               _output = _currentNumber.isNotEmpty ? _currentNumber : "0";
@@ -206,7 +213,6 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
             _operand = "";
             _isNewNumber = true;
             _cursorPosition = _expression.length;
-            _isFinalResult = true;
           });
         }
       } else {
@@ -228,10 +234,12 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
             _cursorPosition = 0;
             _isFinalResult = false;
           } else if (buttonText == "⌫") {
-            if (_cursorPosition > 0) {
-              _expression = _expression.substring(0, _cursorPosition - 1) +
-                  _expression.substring(_cursorPosition);
-              _cursorPosition--;
+            if (_expression.isNotEmpty && !_isFinalResult) {
+              if (_cursorPosition > 0) {
+                _expression = _expression.substring(0, _cursorPosition - 1) +
+                    _expression.substring(_cursorPosition);
+                _cursorPosition--;
+              }
             }
             _isFinalResult = false;
           } else if (buttonText == "+/-") {
@@ -253,19 +261,22 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
             }
             _isFinalResult = false;
           } else if (buttonText == ".") {
-            if (!_currentNumber.contains(".")) {
+            if (_isFinalResult) {
+              _expression = "0.";
+              _currentNumber = "0.";
+              _isFinalResult = false;
+            } else if (!_currentNumber.contains(".")) {
               if (_isNewNumber) {
                 _currentNumber = "0.";
-                _isNewNumber = false;
                 _expression = "0.";
               } else {
                 _currentNumber += ".";
                 _expression += ".";
               }
-              _output = _currentNumber;
-              _cursorPosition = _expression.length;
             }
-            _isFinalResult = false;
+            _output = _currentNumber;
+            _isNewNumber = false;
+            _cursorPosition = _expression.length;
           } else if (buttonText == "+" ||
               buttonText == "-" ||
               buttonText == "×" ||
@@ -285,7 +296,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
             } else {
               _expression = _output + buttonText;
             }
-            _num1 = double.parse(_output);
+            _num1 = double.tryParse(_output) ?? 0.0;
             _operand = buttonText;
             _isNewNumber = true;
             _currentNumber = "";
@@ -293,15 +304,18 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
             _cursorPosition = _expression.length;
             _isFinalResult = false;
           } else {
-            if (_isNewNumber) {
+            if (_isFinalResult || _isNewNumber) {
+              if (_isFinalResult) _expression = "";
               _currentNumber = buttonText;
               _isNewNumber = false;
+              _isFinalResult = false;
             } else {
               _currentNumber += buttonText;
             }
+
             if (_operand.isNotEmpty && _isNewNumber) {
               _expression += buttonText;
-            } else {
+            } else if (!_isFinalResult) {
               _expression = _expression.substring(0, _cursorPosition) +
                   buttonText +
                   _expression.substring(_cursorPosition);
@@ -309,7 +323,6 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
             _cursorPosition++;
             _output = _currentNumber;
             _selectedOperator = "";
-            _isFinalResult = false;
           }
         });
       }
