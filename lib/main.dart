@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:vibration/vibration.dart';
 
 void main() {
   runApp(const CalculatorApp());
@@ -154,6 +157,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
   double _fontSize = 88.0;
   bool _isFinalResult = false;
   bool _isProcessing = false;
+  String _pressedButton = "";
 
   @override
   void initState() {
@@ -191,6 +195,15 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
 
     try {
       _isProcessing = true;
+      setState(() {
+        _pressedButton = buttonText;
+      });
+      Vibration.vibrate(duration: 50);
+      await Future.delayed(const Duration(milliseconds: 100));
+      setState(() {
+        _pressedButton = "";
+      });
+
       if (buttonText == "=") {
         if (_expression.isNotEmpty && !_isFinalResult) {
           final expressionToCalculate = _expression;
@@ -199,7 +212,8 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
             _realTimeOutput = "";
           });
 
-          final result = await compute(_calculateFinalResult, expressionToCalculate);
+          final result =
+              await compute(_calculateFinalResult, expressionToCalculate);
 
           setState(() {
             if (result.isEmpty) {
@@ -336,87 +350,75 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
     }
   }
 
-  Widget _buildButton(String buttonValue, Color buttonColor, Color textColor,
-      {Widget? child}) {
-    Color currentButtonColor = buttonColor;
-    Color currentTextColor = textColor;
-
-    if (buttonValue == _selectedOperator) {
-      currentButtonColor = textColor;
-      currentTextColor = buttonColor;
-    }
+  Widget _buildButton(String buttonValue,
+      {bool isOperator = false, Widget? child}) {
+    bool isPressed = _pressedButton == buttonValue;
+    double scale = isPressed ? 0.85 : 1.0;
+    Matrix4 transform = isPressed ? (Matrix4.identity()..scale(scale)) : Matrix4.identity();
 
     return Expanded(
-      child: Container(
-        margin: const EdgeInsets.all(7.5),
-        child: ElevatedButton(
-          onPressed: () => _buttonPressed(buttonValue),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: currentButtonColor,
-            foregroundColor: currentTextColor,
-            shape: const CircleBorder(),
-            padding: const EdgeInsets.all(19),
-            minimumSize: const Size(78, 78),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        transform: transform,
+        child: Container(
+          margin: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                spreadRadius: 1,
+                blurRadius: 10,
+                offset: const Offset(4, 4),
+              ),
+            ],
+            borderRadius: BorderRadius.circular(50),
           ),
-          child: child ??
-              Text(
-                buttonValue,
-                style: const TextStyle(
-                  fontSize: 34.0,
-                  fontWeight: FontWeight.w500,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(50),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: isOperator
+                      ? const LinearGradient(
+                          colors: [Color(0xFFFF9500), Color(0xFFFFB900)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        )
+                      : LinearGradient(
+                          colors: [
+                            const Color(0xFF333333).withOpacity(0.6),
+                            const Color(0xFF1C1C1C).withOpacity(0.6)
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                  borderRadius: BorderRadius.circular(50),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.1),
+                  ),
+                ),
+                child: ElevatedButton(
+                  onPressed: () => _buttonPressed(buttonValue),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    foregroundColor: Colors.white,
+                    shape: const CircleBorder(),
+                    padding: const EdgeInsets.all(19),
+                    minimumSize: const Size(78, 78),
+                    shadowColor: Colors.transparent,
+                  ),
+                  child: child ??
+                      Text(
+                        buttonValue,
+                        style: const TextStyle(
+                          fontSize: 34.0,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                 ),
               ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildZeroButton(
-      String buttonValue, Color buttonColor, Color textColor,
-      {Widget? child}) {
-    return Expanded(
-      child: Container(
-        margin: const EdgeInsets.all(7.5),
-        child: ElevatedButton(
-          onPressed: () => _buttonPressed(buttonValue),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: buttonColor,
-            foregroundColor: textColor,
-            shape: const CircleBorder(),
-            padding: const EdgeInsets.all(19),
-            minimumSize: const Size(78, 78),
-          ),
-          child: child ??
-              Text(
-                buttonValue,
-                style: const TextStyle(
-                  fontSize: 34.0,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCalculatorButton() {
-    return Expanded(
-      child: Container(
-        margin: const EdgeInsets.all(7.5),
-        child: ElevatedButton(
-          onPressed: () {
-            // Handle calculator button press
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF333333),
-            foregroundColor: Colors.white,
-            shape: const CircleBorder(),
-            padding: const EdgeInsets.all(19),
-            minimumSize: const Size(78, 78),
-          ),
-          child: const Icon(
-            Icons.calculate,
-            size: 34.0,
+            ),
           ),
         ),
       ),
@@ -583,43 +585,41 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
               children: [
                 Row(
                   children: <Widget>[
-                    _buildButton("AC", const Color(0xFFA5A5A5), Colors.black),
-                    _buildButton("⌫", const Color(0xFFA5A5A5), Colors.black),
-                    _buildButton("%", const Color(0xFFA5A5A5), Colors.black),
-                    _buildButton("÷", const Color(0xFFFF9500), Colors.white),
+                    _buildButton("AC"),
+                    _buildButton("⌫"),
+                    _buildButton("%"),
+                    _buildButton("÷", isOperator: true),
                   ],
                 ),
                 Row(
                   children: <Widget>[
-                    _buildButton("7", const Color(0xFF333333), Colors.white),
-                    _buildButton("8", const Color(0xFF333333), Colors.white),
-                    _buildButton("9", const Color(0xFF333333), Colors.white),
-                    _buildButton("×", const Color(0xFFFF9500), Colors.white),
+                    _buildButton("7"),
+                    _buildButton("8"),
+                    _buildButton("9"),
+                    _buildButton("×", isOperator: true),
                   ],
                 ),
                 Row(
                   children: <Widget>[
-                    _buildButton("4", const Color(0xFF333333), Colors.white),
-                    _buildButton("5", const Color(0xFF333333), Colors.white),
-                    _buildButton("6", const Color(0xFF333333), Colors.white),
-                    _buildButton("-", const Color(0xFFFF9500), Colors.white),
+                    _buildButton("4"),
+                    _buildButton("5"),
+                    _buildButton("6"),
+                    _buildButton("-", isOperator: true),
                   ],
                 ),
                 Row(
                   children: <Widget>[
-                    _buildButton("1", const Color(0xFF333333), Colors.white),
-                    _buildButton("2", const Color(0xFF333333), Colors.white),
-                    _buildButton("3", const Color(0xFF333333), Colors.white),
-                    _buildButton("+", const Color(0xFFFF9500), Colors.white),
+                    _buildButton("1"),
+                    _buildButton("2"),
+                    _buildButton("3"),
+                    _buildButton("+", isOperator: true),
                   ],
                 ),
                 Row(
                   children: <Widget>[
-                    _buildCalculatorButton(),
-                    _buildZeroButton(
-                        "0", const Color(0xFF333333), Colors.white),
-                    _buildButton(".", const Color(0xFF333333), Colors.white),
-                    _buildButton("=", const Color(0xFFFF9500), Colors.white),
+                    _buildButton("0"),
+                    _buildButton("."),
+                    _buildButton("=", isOperator: true),
                   ],
                 ),
               ],
