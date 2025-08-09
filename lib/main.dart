@@ -1,10 +1,117 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 void main() {
   runApp(const CalculatorApp());
+}
+
+String _calculateFinalResult(String expression) {
+  try {
+    String finalExpression = expression.replaceAll("×", "*").replaceAll("÷", "/");
+    while (finalExpression.isNotEmpty &&
+        "+-*/".contains(finalExpression.substring(finalExpression.length - 1))) {
+      finalExpression =
+          finalExpression.substring(0, finalExpression.length - 1);
+    }
+
+    if (finalExpression.isEmpty) {
+      return "";
+    }
+
+    List<String> parts = finalExpression.split(RegExp(r'[+\-*/]'));
+    List<String> operators =
+        finalExpression.replaceAll(RegExp(r'[0-9.]'), '').split('');
+
+    if (parts.isNotEmpty) {
+      double result = double.parse(parts[0]);
+      for (int i = 0; i < operators.length; i++) {
+        double nextNum = double.parse(parts[i + 1]);
+        switch (operators[i]) {
+          case "+":
+            result += nextNum;
+            break;
+          case "-":
+            result -= nextNum;
+            break;
+          case "*":
+            result *= nextNum;
+            break;
+          case "/":
+            if (nextNum != 0) {
+              result /= nextNum;
+            } else {
+              return "Error";
+            }
+            break;
+        }
+      }
+      String output = result.toString();
+      if (output.endsWith(".0")) {
+        output = output.substring(0, output.length - 2);
+      }
+      return output;
+    }
+    return "";
+  } catch (e) {
+    return "Error";
+  }
+}
+
+String _calculateRealTimeResult(String expression) {
+  try {
+    String finalExpression = expression
+        .replaceAll("×", "*")
+        .replaceAll("÷", "/")
+        .replaceAll("%", "/100");
+    if (finalExpression.isNotEmpty &&
+        !'+-*/'.contains(finalExpression.substring(finalExpression.length - 1)) &&
+        finalExpression.contains(RegExp(r'[+\-*/]'))) {
+      List<String> parts = finalExpression.split(RegExp(r'[+\-*/]'));
+      List<String> operators =
+          finalExpression.replaceAll(RegExp(r'[0-9.]'), '').split('');
+
+      if (parts.length > 1) {
+        double result = double.parse(parts[0]);
+        for (int i = 0; i < operators.length; i++) {
+          if (operators[i] == "/100") {
+            result /= 100;
+            continue;
+          }
+          if (parts[i + 1].isEmpty) continue;
+          double nextNum = double.parse(parts[i + 1]);
+          switch (operators[i]) {
+            case "+":
+              result += nextNum;
+              break;
+            case "-":
+              result -= nextNum;
+              break;
+            case "*":
+              result *= nextNum;
+              break;
+            case "/":
+              if (nextNum != 0) {
+                result /= nextNum;
+              } else {
+                return "Error";
+              }
+              break;
+          }
+        }
+        String resultString = result.toString();
+        if (resultString.endsWith(".0")) {
+          resultString = resultString.substring(0, resultString.length - 2);
+        }
+        return resultString;
+      }
+    }
+    return "";
+  } catch (e) {
+    return "Error";
+  }
 }
 
 class CalculatorApp extends StatelessWidget {
@@ -61,62 +168,20 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
     super.dispose();
   }
 
-  void _updateRealTimeOutput() {
-    try {
-      String finalExpression = _expression.replaceAll("×", "*").replaceAll("÷", "/").replaceAll("%", "/100");
-      if (finalExpression.isNotEmpty &&
-          !'+-*/'.contains(finalExpression.substring(finalExpression.length - 1)) &&
-          finalExpression.contains(RegExp(r'[+\-*/]'))) {
-        List<String> parts = finalExpression.split(RegExp(r'[+\-*/]'));
-        List<String> operators =
-            finalExpression.replaceAll(RegExp(r'[0-9.]'), '').split('');
-
-        if (parts.length > 1) {
-          double result = double.parse(parts[0]);
-          for (int i = 0; i < operators.length; i++) {
-            if (operators[i] == "/100") {
-              result /= 100;
-              continue;
-            }
-            if (parts[i + 1].isEmpty) continue;
-            double nextNum = double.parse(parts[i + 1]);
-            switch (operators[i]) {
-              case "+":
-                result += nextNum;
-                break;
-              case "-":
-                result -= nextNum;
-                break;
-              case "*":
-                result *= nextNum;
-                break;
-              case "/":
-                if (nextNum != 0) {
-                  result /= nextNum;
-                } else {
-                  _realTimeOutput = "Error";
-                  return;
-                }
-                break;
-            }
-          }
-          String resultString = result.toString();
-          if (resultString.endsWith(".0")) {
-            resultString = resultString.substring(0, resultString.length - 2);
-          }
-          _realTimeOutput = resultString;
-        } else {
-          _realTimeOutput = "";
-        }
-      } else {
+  void _updateRealTimeOutput() async {
+    if (_expression.isEmpty) {
+      setState(() {
         _realTimeOutput = "";
-      }
-    } catch (e) {
-      _realTimeOutput = "Error";
+      });
+      return;
     }
+    final result = await compute(_calculateRealTimeResult, _expression);
+    setState(() {
+      _realTimeOutput = result;
+    });
   }
 
-  void _buttonPressed(String buttonText) {
+  void _buttonPressed(String buttonText) async {
     setState(() {
       if (buttonText == "AC") {
         _output = "0";
@@ -170,75 +235,30 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
           _cursorPosition = _expression.length;
         }
       } else if (buttonText == "=") {
-        try {
-          String finalExpression = _expression.replaceAll("×", "*").replaceAll("÷", "/");
-          // Remove trailing operators
-          while (finalExpression.isNotEmpty && "+-*/".contains(finalExpression.substring(finalExpression.length - 1))) {
-            finalExpression = finalExpression.substring(0, finalExpression.length - 1);
-          }
+        if (_expression.isEmpty) return;
 
-          if (finalExpression.isEmpty) {
-            _output = _currentNumber.isNotEmpty ? _currentNumber : "0";
-            _expression = _output;
-            _currentNumber = _output;
-            _operand = "";
-            _isNewNumber = true;
-            _cursorPosition = _expression.length;
+        compute(_calculateFinalResult, _expression).then((result) {
+          if (result.isEmpty) {
+            setState(() {
+              _output = _currentNumber.isNotEmpty ? _currentNumber : "0";
+              _expression = _output;
+              _currentNumber = _output;
+              _operand = "";
+              _isNewNumber = true;
+              _cursorPosition = _expression.length;
+            });
             return;
           }
 
-          List<String> parts = finalExpression.split(RegExp(r'[+\-*/]'));
-          List<String> operators =
-              finalExpression.replaceAll(RegExp(r'[0-9.]'), '').split('');
-
-          if (parts.isNotEmpty) {
-            double result = double.parse(parts[0]);
-            for (int i = 0; i < operators.length; i++) {
-              double nextNum = double.parse(parts[i + 1]);
-              switch (operators[i]) {
-                case "+":
-                  result += nextNum;
-                  break;
-                case "-":
-                  result -= nextNum;
-                  break;
-                case "*":
-                  result *= nextNum;
-                  break;
-                case "/":
-                  if (nextNum != 0) {
-                    result /= nextNum;
-                  } else {
-                    _output = "Error";
-                    _expression = "Error";
-                    _num1 = 0.0;
-                    _currentNumber = "";
-                    _operand = "";
-                    _isNewNumber = true;
-                    return;
-                  }
-                  break;
-              }
-            }
-            _output = result.toString();
-            if (_output.endsWith(".0")) {
-              _output = _output.substring(0, _output.length - 2);
-            }
-            _expression = _output;
-            _currentNumber = _output;
+          setState(() {
+            _output = result;
+            _expression = result;
+            _currentNumber = result;
             _operand = "";
             _isNewNumber = true;
             _cursorPosition = _expression.length;
-          }
-        } catch (e) {
-          _output = "Error";
-          _expression = "Error";
-          _num1 = 0.0;
-          _currentNumber = "";
-          _operand = "";
-          _isNewNumber = true;
-          _cursorPosition = _expression.length;
-        }
+          });
+        });
       } else if (buttonText == "+" ||
           buttonText == "-" ||
           buttonText == "×" ||
@@ -248,7 +268,8 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
               _expression.endsWith("-") ||
               _expression.endsWith("×") ||
               _expression.endsWith("÷")) {
-            _expression = _expression.substring(0, _expression.length - 1) + buttonText;
+            _expression =
+                _expression.substring(0, _expression.length - 1) + buttonText;
           } else {
             _expression += buttonText;
           }
@@ -321,7 +342,8 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
     );
   }
 
-  Widget _buildZeroButton(String buttonValue, Color buttonColor, Color textColor,
+  Widget _buildZeroButton(
+      String buttonValue, Color buttonColor, Color textColor,
       {Widget? child}) {
     return Expanded(
       flex: 2,
@@ -335,8 +357,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(49.0),
             ),
-            padding:
-                const EdgeInsets.symmetric(horizontal: 29, vertical: 19),
+            padding: const EdgeInsets.symmetric(horizontal: 29, vertical: 19),
             minimumSize: const Size(168, 78),
           ),
           child: child ??
@@ -370,9 +391,11 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
                   LayoutBuilder(
-                    builder: (BuildContext context, BoxConstraints constraints) {
+                    builder:
+                        (BuildContext context, BoxConstraints constraints) {
                       double fontSize = 88.0;
-                      final textStyle = TextStyle(fontSize: fontSize, fontWeight: FontWeight.w300);
+                      final textStyle = TextStyle(
+                          fontSize: fontSize, fontWeight: FontWeight.w300);
                       final textPainter = TextPainter(
                         text: TextSpan(text: _expression, style: textStyle),
                         textDirection: TextDirection.ltr,
@@ -380,7 +403,9 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                       textPainter.layout();
 
                       if (textPainter.width > constraints.maxWidth) {
-                        fontSize = (constraints.maxWidth / textPainter.width) * fontSize;
+                        fontSize =
+                            (constraints.maxWidth / textPainter.width) *
+                                fontSize;
                         if (fontSize < 34.0) {
                           fontSize = 34.0;
                         }
@@ -388,13 +413,15 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
 
                       return GestureDetector(
                         onTapUp: (details) {
-                          final textSpan =
-                              TextSpan(text: _expression, style: TextStyle(fontSize: fontSize));
+                          final textSpan = TextSpan(
+                              text: _expression,
+                              style: TextStyle(fontSize: fontSize));
                           final textPainter = TextPainter(
-                              text: textSpan, textDirection: TextDirection.ltr);
+                              text: textSpan,
+                              textDirection: TextDirection.ltr);
                           textPainter.layout();
-                          final position =
-                              textPainter.getPositionForOffset(details.localPosition);
+                          final position = textPainter
+                              .getPositionForOffset(details.localPosition);
                           setState(() {
                             _cursorPosition = position.offset;
                           });
@@ -412,18 +439,22 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                               ),
                               children: [
                                 TextSpan(
-                                  text: _expression.substring(0, _cursorPosition),
+                                  text: _expression.substring(
+                                      0, _cursorPosition),
                                 ),
                                 WidgetSpan(
                                   alignment: PlaceholderAlignment.middle,
                                   child: Container(
                                     width: 2.0,
                                     height: fontSize * 0.8,
-                                    color: _isCursorVisible ? Colors.orange : Colors.transparent,
+                                    color: _isCursorVisible
+                                        ? Colors.orange
+                                        : Colors.transparent,
                                   ),
                                 ),
                                 TextSpan(
-                                  text: _expression.substring(_cursorPosition),
+                                  text:
+                                      _expression.substring(_cursorPosition),
                                 ),
                               ],
                             ),
@@ -432,9 +463,11 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                       );
                     },
                   ),
-                  if (_realTimeOutput.isNotEmpty && _realTimeOutput != _expression)
+                  if (_realTimeOutput.isNotEmpty &&
+                      _realTimeOutput != _expression)
                     LayoutBuilder(
-                      builder: (BuildContext context, BoxConstraints constraints) {
+                      builder:
+                          (BuildContext context, BoxConstraints constraints) {
                         String textToDisplay = _realTimeOutput;
                         final style = const TextStyle(
                           fontSize: 34.0,
@@ -506,7 +539,8 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                 ),
                 Row(
                   children: <Widget>[
-                    _buildZeroButton("0", const Color(0xFF333333), Colors.white),
+                    _buildZeroButton(
+                        "0", const Color(0xFF333333), Colors.white),
                     _buildButton(".", const Color(0xFF333333), Colors.white),
                     _buildButton("=", const Color(0xFFFF9500), Colors.white),
                   ],
