@@ -615,6 +615,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                 ),
                 Row(
                   children: <Widget>[
+                    _buildCalculatorButton(),
                     _buildZeroButton(
                         "0", const Color(0xFF333333), Colors.white),
                     _buildButton(".", const Color(0xFF333333), Colors.white),
