@@ -158,6 +158,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
   bool _isFinalResult = false;
   bool _isProcessing = false;
   String _pressedButton = "";
+  bool _isVibrationEnabled = true;
 
   @override
   void initState() {
@@ -198,8 +199,10 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
       setState(() {
         _pressedButton = buttonText;
       });
-      Vibration.vibrate(duration: 50);
-      await Future.delayed(const Duration(milliseconds: 100));
+      if (_isVibrationEnabled) {
+        Vibration.vibrate(duration: 50);
+      }
+      await Future.delayed(const Duration(milliseconds: 50));
       setState(() {
         _pressedButton = "";
       });
@@ -350,11 +353,44 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
     }
   }
 
+  void _showSettingsDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Settings"),
+          content: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return SwitchListTile(
+                title: const Text("Vibration"),
+                value: _isVibrationEnabled,
+                onChanged: (bool value) {
+                  setState(() {
+                    _isVibrationEnabled = value;
+                  });
+                },
+              );
+            },
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text("Done"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildButton(String buttonValue,
       {bool isOperator = false, Widget? child}) {
     bool isPressed = _pressedButton == buttonValue;
     double scale = isPressed ? 0.85 : 1.0;
-    Matrix4 transform = isPressed ? (Matrix4.identity()..scale(scale)) : Matrix4.identity();
+    Matrix4 transform =
+        isPressed ? (Matrix4.identity()..scale(scale)) : Matrix4.identity();
 
     return Expanded(
       child: AnimatedContainer(
@@ -428,6 +464,16 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: _showSettingsDialog,
+          ),
+        ],
+      ),
       body: Column(
         children: <Widget>[
           Expanded(
