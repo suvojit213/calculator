@@ -151,6 +151,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
   String _realTimeOutput = "";
   bool _isCursorVisible = true;
   Timer? _cursorTimer;
+  double _fontSize = 88.0;
 
   @override
   void initState() {
@@ -393,9 +394,9 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                   LayoutBuilder(
                     builder:
                         (BuildContext context, BoxConstraints constraints) {
-                      double fontSize = 88.0;
+                      double targetFontSize = 88.0;
                       final textStyle = TextStyle(
-                          fontSize: fontSize, fontWeight: FontWeight.w300);
+                          fontSize: targetFontSize, fontWeight: FontWeight.w300);
                       final textPainter = TextPainter(
                         text: TextSpan(text: _expression, style: textStyle),
                         textDirection: TextDirection.ltr,
@@ -403,63 +404,77 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                       textPainter.layout();
 
                       if (textPainter.width > constraints.maxWidth) {
-                        fontSize =
+                        targetFontSize =
                             (constraints.maxWidth / textPainter.width) *
-                                fontSize;
-                        if (fontSize < 34.0) {
-                          fontSize = 34.0;
+                                targetFontSize;
+                        if (targetFontSize < 34.0) {
+                          targetFontSize = 34.0;
                         }
                       }
 
-                      return GestureDetector(
-                        onTapUp: (details) {
-                          final textSpan = TextSpan(
-                              text: _expression,
-                              style: TextStyle(fontSize: fontSize));
-                          final textPainter = TextPainter(
-                              text: textSpan,
-                              textDirection: TextDirection.ltr);
-                          textPainter.layout();
-                          final position = textPainter
-                              .getPositionForOffset(details.localPosition);
+                      if (targetFontSize != _fontSize) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
                           setState(() {
-                            _cursorPosition = position.offset;
+                            _fontSize = targetFontSize;
                           });
-                        },
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          reverse: true,
-                          padding: const EdgeInsets.only(right: 20.0),
-                          child: RichText(
-                            text: TextSpan(
-                              style: TextStyle(
-                                fontSize: fontSize,
-                                fontWeight: FontWeight.w300,
-                                color: Colors.white,
-                              ),
-                              children: [
-                                TextSpan(
-                                  text: _expression.substring(
-                                      0, _cursorPosition),
-                                ),
-                                WidgetSpan(
-                                  alignment: PlaceholderAlignment.middle,
-                                  child: Container(
-                                    width: 2.0,
-                                    height: fontSize * 0.8,
-                                    color: _isCursorVisible
-                                        ? Colors.orange
-                                        : Colors.transparent,
+                        });
+                      }
+
+                      return TweenAnimationBuilder<double>(
+                        tween: Tween<double>(begin: _fontSize, end: _fontSize),
+                        duration: const Duration(milliseconds: 150),
+                        builder: (context, animatedFontSize, child) {
+                          return GestureDetector(
+                            onTapUp: (details) {
+                              final textSpan = TextSpan(
+                                  text: _expression,
+                                  style: TextStyle(fontSize: animatedFontSize));
+                              final textPainter = TextPainter(
+                                  text: textSpan,
+                                  textDirection: TextDirection.ltr);
+                              textPainter.layout();
+                              final position = textPainter
+                                  .getPositionForOffset(details.localPosition);
+                              setState(() {
+                                _cursorPosition = position.offset;
+                              });
+                            },
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              reverse: true,
+                              padding: const EdgeInsets.only(right: 20.0),
+                              child: RichText(
+                                text: TextSpan(
+                                  style: TextStyle(
+                                    fontSize: animatedFontSize,
+                                    fontWeight: FontWeight.w300,
+                                    color: Colors.white,
                                   ),
+                                  children: [
+                                    TextSpan(
+                                      text: _expression.substring(
+                                          0, _cursorPosition),
+                                    ),
+                                    WidgetSpan(
+                                      alignment: PlaceholderAlignment.middle,
+                                      child: Container(
+                                        width: 2.0,
+                                        height: animatedFontSize * 0.8,
+                                        color: _isCursorVisible
+                                            ? Colors.orange
+                                            : Colors.transparent,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: _expression
+                                          .substring(_cursorPosition),
+                                    ),
+                                  ],
                                 ),
-                                TextSpan(
-                                  text:
-                                      _expression.substring(_cursorPosition),
-                                ),
-                              ],
+                              ),
                             ),
-                          ),
-                        ),
+                          );
+                        },
                       );
                     },
                   ),
