@@ -313,24 +313,19 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
               if (_isNewNumber) {
                 _currentNumber = buttonText;
                 _isNewNumber = false;
-                if (_operand.isNotEmpty) {
-                  _expression += buttonText;
-                } else {
-                  _expression = buttonText;
-                }
               } else {
                 _currentNumber += buttonText;
-                if (_cursorPosition > _expression.length) {
-                  _expression += buttonText;
-                } else {
-                  _expression = _expression.substring(0, _cursorPosition) +
-                      buttonText +
-                      _expression.substring(_cursorPosition);
-                }
+              }
+              if (_operand.isNotEmpty && _isNewNumber) {
+                _expression += buttonText;
+              } else {
+                _expression = _expression.substring(0, _cursorPosition) +
+                    buttonText +
+                    _expression.substring(_cursorPosition);
               }
               _output = _currentNumber;
             }
-            _cursorPosition++;
+            _cursorPosition = _expression.length;
             _selectedOperator = "";
           }
         });
