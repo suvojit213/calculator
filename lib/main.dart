@@ -468,7 +468,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                             textDisplayWidget = SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
                               reverse: true,
-                              padding: const EdgeInsets.only(right: 20.0),
+                              padding: const EdgeInsets.symmetric(horizontal: 20.0),
                               child: textDisplayWidget,
                             );
                           }
