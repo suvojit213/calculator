@@ -153,6 +153,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
   Timer? _cursorTimer;
   double _fontSize = 88.0;
   bool _isFinalResult = false;
+  bool _isProcessing = false;
 
   @override
   void initState() {
@@ -170,7 +171,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
     super.dispose();
   }
 
-  void _updateRealTimeOutput() async {
+  Future<void> _updateRealTimeOutput() async {
     if (_expression.isEmpty) {
       setState(() {
         _realTimeOutput = "";
@@ -178,143 +179,144 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
       return;
     }
     final result = await compute(_calculateRealTimeResult, _expression);
-    setState(() {
-      _realTimeOutput = result;
-    });
+    if (mounted) {
+      setState(() {
+        _realTimeOutput = result;
+      });
+    }
   }
 
-  void _buttonPressed(String buttonText) async {
-    setState(() {
-      if (buttonText == "AC") {
-        _output = "0";
-        _expression = "";
-        _currentNumber = "";
-        _num1 = 0.0;
-        _operand = "";
-        _isNewNumber = true;
-        _cursorPosition = 0;
-        _isFinalResult = false;
-      } else if (buttonText == "C") {
-        _output = "0";
-        _expression = "";
-        _currentNumber = "";
-        _isNewNumber = true;
-        _cursorPosition = 0;
-        _isFinalResult = false;
-      } else if (buttonText == "⌫") {
-        if (_cursorPosition > 0) {
-          _expression = _expression.substring(0, _cursorPosition - 1) +
-              _expression.substring(_cursorPosition);
-          _cursorPosition--;
-        }
-        _isFinalResult = false;
-      } else if (buttonText == "+/-") {
-        if (_currentNumber.isNotEmpty && _currentNumber != "0") {
-          if (_currentNumber.startsWith("-")) {
-            _currentNumber = _currentNumber.substring(1);
-          } else {
-            _currentNumber = "-" + _currentNumber;
-          }
-          _expression = _expression.replaceFirst(
-              RegExp(r'\b' + _currentNumber.replaceAll("-", "") + r'\b'),
-              _currentNumber);
-          _output = _currentNumber;
-        }
-      } else if (buttonText == "%") {
-        if (_currentNumber.isNotEmpty) {
-          _expression += buttonText;
-          _cursorPosition = _expression.length;
-          _updateRealTimeOutput();
-        }
-        _isFinalResult = false;
-      } else if (buttonText == ".") {
-        if (!_currentNumber.contains(".")) {
-          if (_isNewNumber) {
-            _currentNumber = "0.";
-            _isNewNumber = false;
-            _expression = "0.";
-          } else {
-            _currentNumber += ".";
-            _expression += ".";
-          }
-          _output = _currentNumber;
-          _cursorPosition = _expression.length;
-        }
-        _isFinalResult = false;
-      } else if (buttonText == "=") {
-        if (_expression.isEmpty) return;
+  Future<void> _buttonPressed(String buttonText) async {
+    if (_isProcessing) return;
+    _isProcessing = true;
 
-        compute(_calculateFinalResult, _expression).then((result) {
-          if (result.isEmpty) {
-            setState(() {
+    try {
+      if (buttonText == "=") {
+        if (_expression.isNotEmpty) {
+          final result = await compute(_calculateFinalResult, _expression);
+          setState(() {
+            if (result.isEmpty) {
               _output = _currentNumber.isNotEmpty ? _currentNumber : "0";
               _expression = _output;
-              _currentNumber = _output;
-              _operand = "";
-              _isNewNumber = true;
-              _cursorPosition = _expression.length;
-            });
-            return;
-          }
-
-          setState(() {
-            _output = result;
-            _expression = result;
-            _currentNumber = result;
+            } else {
+              _output = result;
+              _expression = result;
+            }
+            _currentNumber = _expression;
             _operand = "";
             _isNewNumber = true;
             _cursorPosition = _expression.length;
             _isFinalResult = true;
           });
-        });
-      } else if (buttonText == "+" ||
-          buttonText == "-" ||
-          buttonText == "×" ||
-          buttonText == "÷") {
-        if (_expression.isNotEmpty) {
-          if (_expression.endsWith("+") ||
-              _expression.endsWith("-") ||
-              _expression.endsWith("×") ||
-              _expression.endsWith("÷")) {
-            _expression =
-                _expression.substring(0, _expression.length - 1) + buttonText;
-          } else {
-            _expression += buttonText;
-          }
-        } else if (_currentNumber.isNotEmpty) {
-          _expression = _currentNumber + buttonText;
-        } else {
-          _expression = _output + buttonText;
         }
-
-        _num1 = double.parse(_output);
-        _operand = buttonText;
-        _isNewNumber = true;
-        _currentNumber = "";
-        _selectedOperator = buttonText;
-        _cursorPosition = _expression.length;
-        _isFinalResult = false;
       } else {
-        if (_isNewNumber) {
-          _currentNumber = buttonText;
-          _isNewNumber = false;
-        } else {
-          _currentNumber += buttonText;
-        }
-        if (_operand.isNotEmpty && _isNewNumber) {
-          _expression += buttonText;
-        } else {
-          _expression = _expression.substring(0, _cursorPosition) +
-              buttonText +
-              _expression.substring(_cursorPosition);
-        }
-        _cursorPosition++;
-        _output = _currentNumber;
-        _selectedOperator = "";
-        _isFinalResult = false;
+        setState(() {
+          if (buttonText == "AC") {
+            _output = "0";
+            _expression = "";
+            _currentNumber = "";
+            _num1 = 0.0;
+            _operand = "";
+            _isNewNumber = true;
+            _cursorPosition = 0;
+            _isFinalResult = false;
+          } else if (buttonText == "C") {
+            _output = "0";
+            _expression = "";
+            _currentNumber = "";
+            _isNewNumber = true;
+            _cursorPosition = 0;
+            _isFinalResult = false;
+          } else if (buttonText == "⌫") {
+            if (_cursorPosition > 0) {
+              _expression = _expression.substring(0, _cursorPosition - 1) +
+                  _expression.substring(_cursorPosition);
+              _cursorPosition--;
+            }
+            _isFinalResult = false;
+          } else if (buttonText == "+/-") {
+            if (_currentNumber.isNotEmpty && _currentNumber != "0") {
+              if (_currentNumber.startsWith("-")) {
+                _currentNumber = _currentNumber.substring(1);
+              } else {
+                _currentNumber = "-" + _currentNumber;
+              }
+              _expression = _expression.replaceFirst(
+                  RegExp(r'\b' + _currentNumber.replaceAll("-", "") + r'\b'),
+                  _currentNumber);
+              _output = _currentNumber;
+            }
+          } else if (buttonText == "%") {
+            if (_currentNumber.isNotEmpty) {
+              _expression += buttonText;
+              _cursorPosition = _expression.length;
+            }
+            _isFinalResult = false;
+          } else if (buttonText == ".") {
+            if (!_currentNumber.contains(".")) {
+              if (_isNewNumber) {
+                _currentNumber = "0.";
+                _isNewNumber = false;
+                _expression = "0.";
+              } else {
+                _currentNumber += ".";
+                _expression += ".";
+              }
+              _output = _currentNumber;
+              _cursorPosition = _expression.length;
+            }
+            _isFinalResult = false;
+          } else if (buttonText == "+" ||
+              buttonText == "-" ||
+              buttonText == "×" ||
+              buttonText == "÷") {
+            if (_expression.isNotEmpty) {
+              if (_expression.endsWith("+") ||
+                  _expression.endsWith("-") ||
+                  _expression.endsWith("×") ||
+                  _expression.endsWith("÷")) {
+                _expression = _expression.substring(0, _expression.length - 1) +
+                    buttonText;
+              } else {
+                _expression += buttonText;
+              }
+            } else if (_currentNumber.isNotEmpty) {
+              _expression = _currentNumber + buttonText;
+            } else {
+              _expression = _output + buttonText;
+            }
+            _num1 = double.parse(_output);
+            _operand = buttonText;
+            _isNewNumber = true;
+            _currentNumber = "";
+            _selectedOperator = buttonText;
+            _cursorPosition = _expression.length;
+            _isFinalResult = false;
+          } else {
+            if (_isNewNumber) {
+              _currentNumber = buttonText;
+              _isNewNumber = false;
+            } else {
+              _currentNumber += buttonText;
+            }
+            if (_operand.isNotEmpty && _isNewNumber) {
+              _expression += buttonText;
+            } else {
+              _expression = _expression.substring(0, _cursorPosition) +
+                  buttonText +
+                  _expression.substring(_cursorPosition);
+            }
+            _cursorPosition++;
+            _output = _currentNumber;
+            _selectedOperator = "";
+            _isFinalResult = false;
+          }
+        });
       }
-    });
-    _updateRealTimeOutput();
+      await _updateRealTimeOutput();
+    } finally {
+      _isProcessing = false;
+    }
   }
 
   Widget _buildButton(String buttonValue, Color buttonColor, Color textColor,
@@ -423,9 +425,11 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
 
                       if (targetFontSize != _fontSize) {
                         WidgetsBinding.instance.addPostFrameCallback((_) {
-                          setState(() {
-                            _fontSize = targetFontSize;
-                          });
+                          if (mounted) {
+                            setState(() {
+                              _fontSize = targetFontSize;
+                            });
+                          }
                         });
                       }
 
@@ -468,7 +472,8 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                             textDisplayWidget = SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
                               reverse: true,
-                              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20.0),
                               child: textDisplayWidget,
                             );
                           }
