@@ -152,6 +152,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
   bool _isCursorVisible = true;
   Timer? _cursorTimer;
   double _fontSize = 88.0;
+  bool _isFinalResult = false;
 
   @override
   void initState() {
@@ -192,18 +193,21 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
         _operand = "";
         _isNewNumber = true;
         _cursorPosition = 0;
+        _isFinalResult = false;
       } else if (buttonText == "C") {
         _output = "0";
         _expression = "";
         _currentNumber = "";
         _isNewNumber = true;
         _cursorPosition = 0;
+        _isFinalResult = false;
       } else if (buttonText == "⌫") {
         if (_cursorPosition > 0) {
           _expression = _expression.substring(0, _cursorPosition - 1) +
               _expression.substring(_cursorPosition);
           _cursorPosition--;
         }
+        _isFinalResult = false;
       } else if (buttonText == "+/-") {
         if (_currentNumber.isNotEmpty && _currentNumber != "0") {
           if (_currentNumber.startsWith("-")) {
@@ -222,6 +226,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
           _cursorPosition = _expression.length;
           _updateRealTimeOutput();
         }
+        _isFinalResult = false;
       } else if (buttonText == ".") {
         if (!_currentNumber.contains(".")) {
           if (_isNewNumber) {
@@ -235,6 +240,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
           _output = _currentNumber;
           _cursorPosition = _expression.length;
         }
+        _isFinalResult = false;
       } else if (buttonText == "=") {
         if (_expression.isEmpty) return;
 
@@ -258,6 +264,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
             _operand = "";
             _isNewNumber = true;
             _cursorPosition = _expression.length;
+            _isFinalResult = true;
           });
         });
       } else if (buttonText == "+" ||
@@ -286,6 +293,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
         _currentNumber = "";
         _selectedOperator = buttonText;
         _cursorPosition = _expression.length;
+        _isFinalResult = false;
       } else {
         if (_isNewNumber) {
           _currentNumber = buttonText;
@@ -303,6 +311,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
         _cursorPosition++;
         _output = _currentNumber;
         _selectedOperator = "";
+        _isFinalResult = false;
       }
     });
     _updateRealTimeOutput();
@@ -407,7 +416,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                         targetFontSize =
                             (constraints.maxWidth / textPainter.width) *
                                 targetFontSize;
-                        if (targetFontSize < 34.0) {
+                        if (!_isFinalResult && targetFontSize < 34.0) {
                           targetFontSize = 34.0;
                         }
                       }
@@ -424,8 +433,49 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                         tween: Tween<double>(begin: _fontSize, end: _fontSize),
                         duration: const Duration(milliseconds: 150),
                         builder: (context, animatedFontSize, child) {
+                          Widget textDisplayWidget = RichText(
+                            text: TextSpan(
+                              style: TextStyle(
+                                fontSize: animatedFontSize,
+                                fontWeight: FontWeight.w300,
+                                color: Colors.white,
+                              ),
+                              children: [
+                                TextSpan(
+                                  text: _expression.substring(
+                                      0, _cursorPosition),
+                                ),
+                                if (!_isFinalResult)
+                                  WidgetSpan(
+                                    alignment: PlaceholderAlignment.middle,
+                                    child: Container(
+                                      width: 2.0,
+                                      height: animatedFontSize * 0.8,
+                                      color: _isCursorVisible
+                                          ? Colors.orange
+                                          : Colors.transparent,
+                                    ),
+                                  ),
+                                TextSpan(
+                                  text:
+                                      _expression.substring(_cursorPosition),
+                                ),
+                              ],
+                            ),
+                          );
+
+                          if (!_isFinalResult) {
+                            textDisplayWidget = SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              reverse: true,
+                              padding: const EdgeInsets.only(right: 20.0),
+                              child: textDisplayWidget,
+                            );
+                          }
+
                           return GestureDetector(
                             onTapUp: (details) {
+                              if (_isFinalResult) return;
                               final textSpan = TextSpan(
                                   text: _expression,
                                   style: TextStyle(fontSize: animatedFontSize));
@@ -439,40 +489,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                                 _cursorPosition = position.offset;
                               });
                             },
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              reverse: true,
-                              padding: const EdgeInsets.only(right: 20.0),
-                              child: RichText(
-                                text: TextSpan(
-                                  style: TextStyle(
-                                    fontSize: animatedFontSize,
-                                    fontWeight: FontWeight.w300,
-                                    color: Colors.white,
-                                  ),
-                                  children: [
-                                    TextSpan(
-                                      text: _expression.substring(
-                                          0, _cursorPosition),
-                                    ),
-                                    WidgetSpan(
-                                      alignment: PlaceholderAlignment.middle,
-                                      child: Container(
-                                        width: 2.0,
-                                        height: animatedFontSize * 0.8,
-                                        color: _isCursorVisible
-                                            ? Colors.orange
-                                            : Colors.transparent,
-                                      ),
-                                    ),
-                                    TextSpan(
-                                      text: _expression
-                                          .substring(_cursorPosition),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
+                            child: textDisplayWidget,
                           );
                         },
                       );
