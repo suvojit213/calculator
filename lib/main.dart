@@ -305,28 +305,32 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
             _cursorPosition = _expression.length;
           } else {
             if (_isFinalResult) {
-              _output = buttonText;
               _expression = buttonText;
               _currentNumber = buttonText;
+              _output = buttonText;
               _isFinalResult = false;
-              _isNewNumber = false;
             } else {
               if (_isNewNumber) {
                 _currentNumber = buttonText;
                 _isNewNumber = false;
+                if (_operand.isNotEmpty) {
+                  _expression += buttonText;
+                } else {
+                  _expression = buttonText;
+                }
               } else {
                 _currentNumber += buttonText;
-              }
-              if (_operand.isNotEmpty && _isNewNumber) {
-                _expression += buttonText;
-              } else {
-                _expression = _expression.substring(0, _cursorPosition) +
-                    buttonText +
-                    _expression.substring(_cursorPosition);
+                if (_cursorPosition > _expression.length) {
+                  _expression += buttonText;
+                } else {
+                  _expression = _expression.substring(0, _cursorPosition) +
+                      buttonText +
+                      _expression.substring(_cursorPosition);
+                }
               }
               _output = _currentNumber;
             }
-            _cursorPosition = _expression.length;
+            _cursorPosition++;
             _selectedOperator = "";
           }
         });
