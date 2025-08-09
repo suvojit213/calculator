@@ -449,7 +449,9 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                       );
                       textPainter.layout();
 
-                      if (textPainter.width > constraints.maxWidth) {
+                      if (_expression.length > 10) {
+                        targetFontSize = 34.0;
+                      } else if (textPainter.width > constraints.maxWidth) {
                         targetFontSize =
                             (constraints.maxWidth / textPainter.width) *
                                 targetFontSize;
