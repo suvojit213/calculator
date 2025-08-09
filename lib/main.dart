@@ -428,13 +428,36 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                     },
                   ),
                   if (_realTimeOutput.isNotEmpty && _realTimeOutput != _expression)
-                    Text(
-                      _realTimeOutput,
-                      style: const TextStyle(
-                        fontSize: 34.0,
-                        fontWeight: FontWeight.w300,
-                        color: Colors.grey,
-                      ),
+                    LayoutBuilder(
+                      builder: (BuildContext context, BoxConstraints constraints) {
+                        String textToDisplay = _realTimeOutput;
+                        final style = const TextStyle(
+                          fontSize: 34.0,
+                          fontWeight: FontWeight.w300,
+                          color: Colors.grey,
+                        );
+
+                        final textPainter = TextPainter(
+                          text: TextSpan(text: textToDisplay, style: style),
+                          maxLines: 1,
+                          textDirection: TextDirection.ltr,
+                        );
+                        textPainter.layout();
+
+                        if (textPainter.width > constraints.maxWidth / 2) {
+                          try {
+                            final number = double.parse(_realTimeOutput);
+                            textToDisplay = number.toStringAsExponential(6);
+                          } catch (e) {
+                            textToDisplay = _realTimeOutput;
+                          }
+                        }
+
+                        return Text(
+                          textToDisplay,
+                          style: style,
+                        );
+                      },
                     ),
                 ],
               ),
