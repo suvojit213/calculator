@@ -167,6 +167,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
             _expression += ".";
           }
           _output = _currentNumber;
+          _cursorPosition = _expression.length;
         }
       } else if (buttonText == "=") {
         try {
@@ -413,9 +414,13 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                                 TextSpan(
                                   text: _expression.substring(0, _cursorPosition),
                                 ),
-                                TextSpan(
-                                  text: "|",
-                                  style: TextStyle(color: _isCursorVisible ? Colors.orange : Colors.transparent),
+                                WidgetSpan(
+                                  alignment: PlaceholderAlignment.middle,
+                                  child: Container(
+                                    width: 2.0,
+                                    height: fontSize * 0.8,
+                                    color: _isCursorVisible ? Colors.orange : Colors.transparent,
+                                  ),
                                 ),
                                 TextSpan(
                                   text: _expression.substring(_cursorPosition),
