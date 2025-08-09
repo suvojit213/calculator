@@ -375,7 +375,6 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
       String buttonValue, Color buttonColor, Color textColor,
       {Widget? child}) {
     return Expanded(
-      flex: 2,
       child: Container(
         margin: const EdgeInsets.all(7.5),
         child: ElevatedButton(
@@ -383,23 +382,42 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
           style: ElevatedButton.styleFrom(
             backgroundColor: buttonColor,
             foregroundColor: textColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(49.0),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 29, vertical: 19),
-            minimumSize: const Size(168, 78),
+            shape: const CircleBorder(),
+            padding: const EdgeInsets.all(19),
+            minimumSize: const Size(78, 78),
           ),
           child: child ??
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  buttonValue,
-                  style: const TextStyle(
-                    fontSize: 34.0,
-                    fontWeight: FontWeight.w500,
-                  ),
+              Text(
+                buttonValue,
+                style: const TextStyle(
+                  fontSize: 34.0,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCalculatorButton() {
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.all(7.5),
+        child: ElevatedButton(
+          onPressed: () {
+            // Handle calculator button press
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF333333),
+            foregroundColor: Colors.white,
+            shape: const CircleBorder(),
+            padding: const EdgeInsets.all(19),
+            minimumSize: const Size(78, 78),
+          ),
+          child: const Icon(
+            Icons.calculate,
+            size: 34.0,
+          ),
         ),
       ),
     );
