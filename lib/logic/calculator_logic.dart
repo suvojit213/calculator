@@ -1,3 +1,4 @@
+
 int getPrecedence(String operator) {
   switch (operator) {
     case "+":
@@ -92,9 +93,16 @@ String calculateFinalResult(String expression) {
 
 String calculateRealTimeResult(String expression) {
   try {
-    // For simplicity, we will just use the final result logic for real-time preview.
-    // A more sophisticated approach would be needed for a true real-time result
-    // that respects precedence as you type.
+    expression = expression.trim();
+    if (expression.isEmpty) {
+      return "";
+    }
+
+    String lastChar = expression.substring(expression.length - 1);
+    if ("+-×÷".contains(lastChar)) {
+      return "";
+    }
+
     return calculateFinalResult(expression);
   } catch (e) {
     return ""; // Return empty string in case of intermediate errors
