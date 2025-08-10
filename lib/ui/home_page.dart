@@ -5,7 +5,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../logic/calculator_logic.dart';
-import 'widgets/calculator_button.dart';
+import 'widgets/button_grid.dart';
+import 'widgets/display_screen.dart';
 
 class CalculatorHomePage extends StatefulWidget {
   const CalculatorHomePage({super.key});
@@ -74,7 +75,8 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
             _realTimeOutput = "";
           });
 
-          final result = await compute(calculateFinalResult, expressionToCalculate);
+          final result =
+              await compute(calculateFinalResult, expressionToCalculate);
 
           setState(() {
             if (result.isEmpty) {
@@ -166,8 +168,9 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
                   _expression.endsWith("-") ||
                   _expression.endsWith("×") ||
                   _expression.endsWith("÷")) {
-                _expression = _expression.substring(0, _expression.length - 1) +
-                    buttonText;
+                _expression =
+                    _expression.substring(0, _expression.length - 1) +
+                        buttonText;
               } else {
                 _expression += buttonText;
               }
@@ -211,207 +214,33 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
     }
   }
 
+  void _onTapUp(TapUpDetails details) {
+    if (_isFinalResult) return;
+    final textSpan =
+        TextSpan(text: _expression, style: TextStyle(fontSize: _fontSize));
+    final textPainter = TextPainter(text: textSpan, textDirection: TextDirection.ltr);
+    textPainter.layout();
+    final position = textPainter.getPositionForOffset(details.localPosition);
+    setState(() {
+      _cursorPosition = position.offset;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         children: <Widget>[
-          Expanded(
-            flex: 2,
-            child: Container(
-              padding: const EdgeInsets.all(19.0),
-              alignment: Alignment.bottomRight,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: <Widget>[
-                  LayoutBuilder(
-                    builder:
-                        (BuildContext context, BoxConstraints constraints) {
-                      double targetFontSize = 88.0;
-                      final textStyle = TextStyle(
-                          fontSize: targetFontSize, fontWeight: FontWeight.w300);
-                      final textPainter = TextPainter(
-                        text: TextSpan(text: _expression, style: textStyle),
-                        textDirection: TextDirection.ltr,
-                      );
-                      textPainter.layout();
-
-                      if (textPainter.width > constraints.maxWidth) {
-                        targetFontSize =
-                            (constraints.maxWidth / textPainter.width) *
-                                targetFontSize;
-                        if (!_isFinalResult && targetFontSize < 52.0) {
-                          targetFontSize = 52.0;
-                        }
-                      }
-
-                      if (targetFontSize != _fontSize) {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          if (mounted) {
-                            setState(() {
-                              _fontSize = targetFontSize;
-                            });
-                          }
-                        });
-                      }
-
-                      return TweenAnimationBuilder<double>(
-                        tween: Tween<double>(begin: _fontSize, end: _fontSize),
-                        duration: const Duration(milliseconds: 150),
-                        builder: (context, animatedFontSize, child) {
-                          Widget textDisplayWidget = RichText(
-                            key: ValueKey(_expression),
-                            text: TextSpan(
-                              style: TextStyle(
-                                fontSize: animatedFontSize,
-                                fontWeight: FontWeight.w300,
-                                color: Colors.white,
-                              ),
-                              children: [
-                                TextSpan(
-                                  text: _expression.substring(
-                                      0, _cursorPosition),
-                                ),
-                                if (!_isFinalResult)
-                                  WidgetSpan(
-                                    alignment: PlaceholderAlignment.middle,
-                                    child: Container(
-                                      width: 2.0,
-                                      height: animatedFontSize * 0.8,
-                                      color: _isCursorVisible
-                                          ? Colors.orange
-                                          : Colors.transparent,
-                                    ),
-                                  ),
-                                TextSpan(
-                                  text:
-                                      _expression.substring(_cursorPosition),
-                                ),
-                              ],
-                            ),
-                          );
-
-                          if (!_isFinalResult) {
-                            textDisplayWidget = SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              reverse: true,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 20.0),
-                              child: textDisplayWidget,
-                            );
-                          }
-
-                          return GestureDetector(
-                            onTapUp: (details) {
-                              if (_isFinalResult) return;
-                              final textSpan = TextSpan(
-                                  text: _expression,
-                                  style: TextStyle(fontSize: animatedFontSize));
-                              final textPainter = TextPainter(
-                                  text: textSpan,
-                                  textDirection: TextDirection.ltr);
-                              textPainter.layout();
-                              final position = textPainter
-                                  .getPositionForOffset(details.localPosition);
-                              setState(() {
-                                _cursorPosition = position.offset;
-                              });
-                            },
-                            child: AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 200),
-                              child: textDisplayWidget,
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                  if (_realTimeOutput.isNotEmpty &&
-                      _realTimeOutput != _expression)
-                    LayoutBuilder(
-                      builder:
-                          (BuildContext context, BoxConstraints constraints) {
-                        String textToDisplay = _realTimeOutput;
-                        final style = const TextStyle(
-                          fontSize: 34.0,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.grey,
-                        );
-
-                        final textPainter = TextPainter(
-                          text: TextSpan(text: textToDisplay, style: style),
-                          maxLines: 1,
-                          textDirection: TextDirection.ltr,
-                        );
-                        textPainter.layout();
-
-                        if (textPainter.width > constraints.maxWidth / 2) {
-                          try {
-                            final number = double.parse(_realTimeOutput);
-                            textToDisplay = number.toStringAsExponential(6);
-                          } catch (e) {
-                            textToDisplay = _realTimeOutput;
-                          }
-                        }
-
-                        return Text(
-                          textToDisplay,
-                          style: style,
-                        );
-                      },
-                    ),
-                ],
-              ),
-            ),
+          DisplayScreen(
+            expression: _expression,
+            cursorPosition: _cursorPosition,
+            isCursorVisible: _isCursorVisible,
+            isFinalResult: _isFinalResult,
+            fontSize: _fontSize,
+            realTimeOutput: _realTimeOutput,
+            onTapUp: _onTapUp,
           ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 15.0),
-            child: Column(
-              children: [
-                Row(
-                  children: <Widget>[
-                    CalculatorButton(value: "AC", color: const Color(0xFFA5A5A5), textColor: Colors.black, onPressed: () => _buttonPressed("AC")),
-                    CalculatorButton(value: "⌫", color: const Color(0xFFA5A5A5), textColor: Colors.black, onPressed: () => _buttonPressed("⌫")),
-                    CalculatorButton(value: "%", color: const Color(0xFFA5A5A5), textColor: Colors.black, onPressed: () => _buttonPressed("%")),
-                    CalculatorButton(value: "÷", color: const Color(0xFFFF9500), textColor: Colors.white, onPressed: () => _buttonPressed("÷")),
-                  ],
-                ),
-                Row(
-                  children: <Widget>[
-                    CalculatorButton(value: "7", color: const Color(0xFF333333), textColor: Colors.white, onPressed: () => _buttonPressed("7")),
-                    CalculatorButton(value: "8", color: const Color(0xFF333333), textColor: Colors.white, onPressed: () => _buttonPressed("8")),
-                    CalculatorButton(value: "9", color: const Color(0xFF333333), textColor: Colors.white, onPressed: () => _buttonPressed("9")),
-                    CalculatorButton(value: "×", color: const Color(0xFFFF9500), textColor: Colors.white, onPressed: () => _buttonPressed("×")),
-                  ],
-                ),
-                Row(
-                  children: <Widget>[
-                    CalculatorButton(value: "4", color: const Color(0xFF333333), textColor: Colors.white, onPressed: () => _buttonPressed("4")),
-                    CalculatorButton(value: "5", color: const Color(0xFF333333), textColor: Colors.white, onPressed: () => _buttonPressed("5")),
-                    CalculatorButton(value: "6", color: const Color(0xFF333333), textColor: Colors.white, onPressed: () => _buttonPressed("6")),
-                    CalculatorButton(value: "-", color: const Color(0xFFFF9500), textColor: Colors.white, onPressed: () => _buttonPressed("-")),
-                  ],
-                ),
-                Row(
-                  children: <Widget>[
-                    CalculatorButton(value: "1", color: const Color(0xFF333333), textColor: Colors.white, onPressed: () => _buttonPressed("1")),
-                    CalculatorButton(value: "2", color: const Color(0xFF333333), textColor: Colors.white, onPressed: () => _buttonPressed("2")),
-                    CalculatorButton(value: "3", color: const Color(0xFF333333), textColor: Colors.white, onPressed: () => _buttonPressed("3")),
-                    CalculatorButton(value: "+", color: const Color(0xFFFF9500), textColor: Colors.white, onPressed: () => _buttonPressed("+")),
-                  ],
-                ),
-                Row(
-                  children: <Widget>[
-                    CalculatorButton(value: "calculator", color: const Color(0xFF333333), textColor: Colors.white, onPressed: () {}, child: const Icon(Icons.calculate, size: 34.0)),
-                    CalculatorButton(value: "0", color: const Color(0xFF333333), textColor: Colors.white, onPressed: () => _buttonPressed("0")),
-                    CalculatorButton(value: ".", color: const Color(0xFF333333), textColor: Colors.white, onPressed: () => _buttonPressed(".")),
-                    CalculatorButton(value: "=", color: const Color(0xFFFF9500), textColor: Colors.white, onPressed: () => _buttonPressed("=")),
-                  ],
-                ),
-              ],
-            ),
-          ),
+          ButtonGrid(onButtonPressed: _buttonPressed),
         ],
       ),
     );
