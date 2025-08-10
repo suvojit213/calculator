@@ -1,50 +1,90 @@
+int getPrecedence(String operator) {
+  switch (operator) {
+    case "+":
+    case "-":
+      return 1;
+    case "×":
+    case "÷":
+      return 2;
+    case "%":
+      return 3;
+    default:
+      return 0;
+  }
+}
+
+double applyOperation(double b, double a, String operator) {
+  switch (operator) {
+    case "+":
+      return a + b;
+    case "-":
+      return a - b;
+    case "×":
+      return a * b;
+    case "÷":
+      if (b == 0) {
+        throw Exception("Division by zero");
+      }
+      return a / b;
+    default:
+      return 0;
+  }
+}
+
 String calculateFinalResult(String expression) {
   try {
-    String finalExpression = expression.replaceAll("×", "*").replaceAll("÷", "/");
-    while (finalExpression.isNotEmpty &&
-        "+-*/".contains(finalExpression.substring(finalExpression.length - 1))) {
-      finalExpression =
-          finalExpression.substring(0, finalExpression.length - 1);
-    }
-
-    if (finalExpression.isEmpty) {
+    if (expression.isEmpty) {
       return "";
     }
 
-    List<String> parts = finalExpression.split(RegExp(r'[+\-*/]'));
-    List<String> operators =
-        finalExpression.replaceAll(RegExp(r'[0-9.]'), '').split('');
+    List<String> tokens = [];
+    String currentNumber = "";
 
-    if (parts.isNotEmpty) {
-      double result = double.parse(parts[0]);
-      for (int i = 0; i < operators.length; i++) {
-        double nextNum = double.parse(parts[i + 1]);
-        switch (operators[i]) {
-          case "+":
-            result += nextNum;
-            break;
-          case "-":
-            result -= nextNum;
-            break;
-          case "*":
-            result *= nextNum;
-            break;
-          case "/":
-            if (nextNum != 0) {
-              result /= nextNum;
-            } else {
-              return "Error";
-            }
-            break;
+    for (int i = 0; i < expression.length; i++) {
+      String char = expression[i];
+      if ("0123456789.".contains(char)) {
+        currentNumber += char;
+      } else {
+        if (currentNumber.isNotEmpty) {
+          tokens.add(currentNumber);
+          currentNumber = "";
         }
+        tokens.add(char);
       }
-      String output = result.toString();
-      if (output.endsWith(".0")) {
-        output = output.substring(0, output.length - 2);
-      }
-      return output;
     }
-    return "";
+    if (currentNumber.isNotEmpty) {
+      tokens.add(currentNumber);
+    }
+
+    List<double> values = [];
+    List<String> ops = [];
+
+    for (int i = 0; i < tokens.length; i++) {
+      String token = tokens[i];
+      if (double.tryParse(token) != null) {
+        values.add(double.parse(token));
+      } else if (token == "%") {
+        double lastValue = values.removeLast();
+        values.add(lastValue / 100);
+      } else {
+        while (ops.isNotEmpty && getPrecedence(ops.last) >= getPrecedence(token)) {
+          double output = applyOperation(values.removeLast(), values.removeLast(), ops.removeLast());
+          values.add(output);
+        }
+        ops.add(token);
+      }
+    }
+
+    while (ops.isNotEmpty) {
+      double output = applyOperation(values.removeLast(), values.removeLast(), ops.removeLast());
+      values.add(output);
+    }
+
+    String result = values.single.toString();
+    if (result.endsWith(".0")) {
+      result = result.substring(0, result.length - 2);
+    }
+    return result;
   } catch (e) {
     return "Error";
   }
@@ -52,54 +92,11 @@ String calculateFinalResult(String expression) {
 
 String calculateRealTimeResult(String expression) {
   try {
-    String finalExpression = expression
-        .replaceAll("×", "*")
-        .replaceAll("÷", "/")
-        .replaceAll("%", "/100");
-    if (finalExpression.isNotEmpty &&
-        !'+-*/'.contains(finalExpression.substring(finalExpression.length - 1)) &&
-        finalExpression.contains(RegExp(r'[+\-*/]'))) {
-      List<String> parts = finalExpression.split(RegExp(r'[+\-*/]'));
-      List<String> operators =
-          finalExpression.replaceAll(RegExp(r'[0-9.]'), '').split('');
-
-      if (parts.length > 1) {
-        double result = double.parse(parts[0]);
-        for (int i = 0; i < operators.length; i++) {
-          if (operators[i] == "/100") {
-            result /= 100;
-            continue;
-          }
-          if (parts[i + 1].isEmpty) continue;
-          double nextNum = double.parse(parts[i + 1]);
-          switch (operators[i]) {
-            case "+":
-              result += nextNum;
-              break;
-            case "-":
-              result -= nextNum;
-              break;
-            case "*":
-              result *= nextNum;
-              break;
-            case "/":
-              if (nextNum != 0) {
-                result /= nextNum;
-              } else {
-                return "Error";
-              }
-              break;
-          }
-        }
-        String resultString = result.toString();
-        if (resultString.endsWith(".0")) {
-          resultString = resultString.substring(0, resultString.length - 2);
-        }
-        return resultString;
-      }
-    }
-    return "";
+    // For simplicity, we will just use the final result logic for real-time preview.
+    // A more sophisticated approach would be needed for a true real-time result
+    // that respects precedence as you type.
+    return calculateFinalResult(expression);
   } catch (e) {
-    return "Error";
+    return ""; // Return empty string in case of intermediate errors
   }
 }
