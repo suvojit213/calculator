@@ -202,7 +202,7 @@ class _CalculatorHomePageState extends State<CalculatorHomePage> {
       if (_isVibrationEnabled) {
         Vibration.vibrate(duration: 50);
       }
-      await Future.delayed(const Duration(milliseconds: 50));
+      
       setState(() {
         _pressedButton = "";
       });
